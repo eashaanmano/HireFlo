@@ -1,0 +1,181 @@
+Roll No,Name,Email,Phone,Branch,Programme,CGPA,Backlogs,Graduation Year,Skills
+M250012CS,Eashaan Manohar,eashaan_m250012cs@nitc.ac.in,9825988000,CSE,MTECH,9.12,0,2026,c++; python; computer architecture; verilog; linux; system design; data structures
+M250047CS,Midhun Unnikrishna Pillai,midhun_m250047cs@nitc.ac.in,9852880483,CSE,MTECH,8.41,0,2026,python; machine learning; nlp; sql; pandas; statistics
+M250088CS,Harsh Kumar Kashyap,harsh_m250088cs@nitc.ac.in,9877446522,CSE,MTECH,8.15,0,2026,react; typescript; javascript; node.js; sql; docker
+B220301CH,Nikhil Unni,nikhil_b220301ch@nitc.ac.in,9408421828,CHE,BTECH,6.83,0,2026,process design; python; matlab; aspen plus; excel; statistics
+B220308CE,Devika George,devika_b220308ce@nitc.ac.in,9196277024,CE,BTECH,7.06,0,2026,excel; python; project management; staad pro; autocad; revit
+B220312EE,Sneha Unni,sneha_b220312ee@nitc.ac.in,9728909716,EEE,BTECH,6.87,0,2026,power systems; digital design; plc; matlab; c
+B220316EE,Manu Suresh,manu_b220316ee@nitc.ac.in,9650775247,EEE,BTECH,6.63,0,2026,digital design; plc; python; verilog; c; excel; power systems
+M240318EE,Karthik Mohan,karthik_m240318ee@nitc.ac.in,9252914319,EEE,MTECH,8.97,0,2026,excel; plc; digital design
+B220319EE,Yash Ahmed,yash_b220319ee@nitc.ac.in,9958780859,EEE,BTECH,8.10,0,2026,verilog; python; plc; power systems; embedded; excel
+B220326ME,Neha Gupta,neha_b220326me@nitc.ac.in,9843725055,ME,BTECH,8.17,1,2026,six sigma; manufacturing; excel; python; matlab; solidworks; ansys
+B220333EE,Devika Suresh,devika_b220333ee@nitc.ac.in,9971772377,EEE,BTECH,9.23,0,2026,python; power systems; digital design
+B220340CS,Manu Joseph,manu_b220340cs@nitc.ac.in,9308935783,CSE,BTECH,5.60,0,2026,c++; dbms; react; data structures; node.js; java
+B220344ME,Aarav Nambiar,aarav_b220344me@nitc.ac.in,9817771848,ME,BTECH,8.34,1,2026,python; ansys; solidworks; excel; cad; matlab; manufacturing
+B220345ME,Varun George,varun_b220345me@nitc.ac.in,9843616058,ME,BTECH,6.44,0,2026,matlab; excel; ansys; python; cad; six sigma
+M240351EE,Adithya Kaimal,adithya_m240351ee@nitc.ac.in,9503733571,EEE,MTECH,6.97,0,2026,python; verilog; plc; c; simulink; excel; power systems
+M240352CS,Ananya Mohan,ananya_m240352cs@nitc.ac.in,9451929677,CSE,MTECH,7.25,0,2026,python; algorithms; data structures
+B220353ME,Devika Das,devika_b220353me@nitc.ac.in,9565582577,ME,BTECH,8.35,0,2026,matlab; excel; manufacturing; ansys
+B220355EE,Arjun Bhat,arjun_b220355ee@nitc.ac.in,9910363366,EEE,BTECH,7.25,0,2026,verilog; matlab; digital design
+B220361ME,Diya Nair,diya_b220361me@nitc.ac.in,9518728644,ME,BTECH,8.03,0,2026,matlab; ansys; cad; manufacturing
+B220368EC,Meera Sharma,meera_b220368ec@nitc.ac.in,9657631828,ECE,BTECH,7.44,0,2026,linux; python; c; matlab; fpga; c++
+M240375EE,Sana Suresh,sana_m240375ee@nitc.ac.in,9199986403,EEE,MTECH,8.43,0,2026,c; excel; matlab
+B220379CE,Pranav Suresh,pranav_b220379ce@nitc.ac.in,9703445637,CE,BTECH,8.52,0,2026,excel; staad pro; python
+B220381ME,Nila Kumar,nila_b220381me@nitc.ac.in,9208937268,ME,BTECH,6.28,0,2026,python; excel; matlab; manufacturing; cad; six sigma; solidworks
+M240385ME,Adithya Pillai,adithya_m240385me@nitc.ac.in,9731476759,ME,MTECH,7.13,0,2026,ansys; excel; matlab; cad
+B220388CE,Adithya Joseph,adithya_b220388ce@nitc.ac.in,9124672126,CE,BTECH,6.39,1,2026,excel; revit; autocad; project management; python; staad pro
+M240393EC,Tejas Kaimal,tejas_m240393ec@nitc.ac.in,9825762789,ECE,MTECH,8.16,0,2026,verilog; python; c++; rtos; embedded; matlab; digital design
+B220400CE,Manu George,manu_b220400ce@nitc.ac.in,9125408290,CE,BTECH,7.12,0,2026,revit; excel; project management; autocad; staad pro
+B220406EC,Nila Kurian,nila_b220406ec@nitc.ac.in,9231732244,ECE,BTECH,7.78,0,2026,c++; embedded; digital design; verilog; vhdl; fpga; c
+M240409CS,Kevin Mathew,kevin_m240409cs@nitc.ac.in,9545922943,CSE,MTECH,6.96,0,2026,python; docker; operating systems; c++; node.js
+B220413EC,Nikhil Raj,nikhil_b220413ec@nitc.ac.in,9117819606,ECE,BTECH,8.45,0,2026,computer architecture; digital design; python; c; fpga; embedded; verilog
+B220416EC,Varun Nair,varun_b220416ec@nitc.ac.in,9779685611,ECE,BTECH,8.45,0,2026,vhdl; fpga; digital design; verilog; computer architecture; c; signal processing
+B220417EE,Aarav Mathew,aarav_b220417ee@nitc.ac.in,9469032122,EEE,BTECH,8.65,0,2026,embedded; plc; power systems; verilog; simulink; python; excel
+B220421CE,Yash Das,yash_b220421ce@nitc.ac.in,9265119630,CE,BTECH,7.57,0,2026,python; project management; excel; autocad; revit; staad pro
+M240424EE,Sana Ahmed,sana_m240424ee@nitc.ac.in,9894053638,EEE,MTECH,7.50,0,2026,power systems; verilog; python; simulink; excel
+B220429CS,Lakshmi Prakash,lakshmi_b220429cs@nitc.ac.in,9971928504,CSE,BTECH,7.83,0,2026,operating systems; linux; python; docker; system design; algorithms; dbms
+M240434ME,Vishnu Nambiar,vishnu_m240434me@nitc.ac.in,9414513013,ME,MTECH,8.23,0,2026,solidworks; cad; excel; ansys; manufacturing
+B220436EC,Abhinav Iyer,abhinav_b220436ec@nitc.ac.in,9553820099,ECE,BTECH,8.36,0,2026,rtos; computer architecture; matlab
+B220443EC,Pranav Varma,pranav_b220443ec@nitc.ac.in,9816940355,ECE,BTECH,7.66,0,2026,fpga; verilog; vhdl; digital design
+B220444CE,Shreya Nambiar,shreya_b220444ce@nitc.ac.in,9214105549,CE,BTECH,7.50,0,2026,project management; staad pro; python; autocad
+B220451CH,Arjun Sharma,arjun_b220451ch@nitc.ac.in,9188636820,CHE,BTECH,7.64,0,2026,python; aspen plus; matlab; statistics; excel; process design
+B220458CS,Devika Raj,devika_b220458cs@nitc.ac.in,9702987681,CSE,BTECH,8.42,0,2026,node.js; linux; docker; algorithms
+B220464EC,Devika Sharma,devika_b220464ec@nitc.ac.in,9328573374,ECE,BTECH,7.48,0,2026,linux; c++; python; rtos; computer architecture
+B220470CS,Karthik Gupta,karthik_b220470cs@nitc.ac.in,9577223641,CSE,BTECH,8.22,0,2026,dbms; react; git
+B220473CS,Nikhil Reddy,nikhil_b220473cs@nitc.ac.in,9690272548,CSE,BTECH,8.77,0,2026,aws; dbms; docker; git; python
+B220476ME,Vishnu George,vishnu_b220476me@nitc.ac.in,9877857320,ME,BTECH,7.51,0,2026,python; six sigma; matlab; cad; solidworks; ansys
+B220482CS,Sidharth Nair,sidharth_b220482cs@nitc.ac.in,9229751130,CSE,BTECH,7.08,0,2026,linux; node.js; python; git; sql; dbms
+B220485ME,Diya Raj,diya_b220485me@nitc.ac.in,9843495219,ME,BTECH,8.76,0,2026,excel; six sigma; cad; matlab; solidworks; manufacturing
+B220486CS,Sneha Reddy,sneha_b220486cs@nitc.ac.in,9864320496,CSE,BTECH,9.70,0,2026,operating systems; java; linux; docker
+B220488EE,Vishnu Menon,vishnu_b220488ee@nitc.ac.in,9468892713,EEE,BTECH,7.35,0,2026,matlab; embedded; c; digital design; power systems; verilog
+B220491EC,Devika Unni,devika_b220491ec@nitc.ac.in,9998203557,ECE,BTECH,7.40,0,2026,verilog; matlab; c++; c
+B220494ME,Manu Mohan,manu_b220494me@nitc.ac.in,9879419380,ME,BTECH,8.27,0,2026,python; excel; solidworks; six sigma; cad
+B220500ME,Pranav Raj,pranav_b220500me@nitc.ac.in,9703488905,ME,BTECH,9.20,0,2026,cad; python; matlab; six sigma; excel; solidworks; manufacturing
+B220503CE,Sana Patil,sana_b220503ce@nitc.ac.in,9598011586,CE,BTECH,5.84,0,2026,project management; staad pro; autocad
+B220510CS,Sana Nair,sana_b220510cs@nitc.ac.in,9671985370,CSE,BTECH,6.20,3,2026,dbms; node.js; linux; docker
+B220512EE,Kevin Bhat,kevin_b220512ee@nitc.ac.in,9815803129,EEE,BTECH,7.57,0,2026,embedded; excel; matlab; plc
+B220515CE,Gayathri Nair,gayathri_b220515ce@nitc.ac.in,9788510228,CE,BTECH,7.58,0,2026,staad pro; python; autocad; revit; excel; project management
+B220516EE,Keerthana Thomas,keerthana_b220516ee@nitc.ac.in,9605557704,EEE,BTECH,8.75,0,2026,simulink; digital design; plc; excel; embedded; verilog; matlab
+M240521CS,Sidharth Reddy,sidharth_m240521cs@nitc.ac.in,9314142429,CSE,MTECH,7.72,0,2026,git; dbms; docker
+B220523CE,Devika Iyer,devika_b220523ce@nitc.ac.in,9775755461,CE,BTECH,7.19,0,2026,python; revit; project management; staad pro; autocad; excel
+B220528ME,Kevin Haque,kevin_b220528me@nitc.ac.in,9829094465,ME,BTECH,9.22,0,2026,ansys; matlab; cad
+M240530EE,Lakshmi Mathew,lakshmi_m240530ee@nitc.ac.in,9408289135,EEE,MTECH,8.69,0,2026,matlab; verilog; embedded; power systems; plc; digital design
+B220534ME,Sana Das,sana_b220534me@nitc.ac.in,9339005712,ME,BTECH,8.93,0,2026,ansys; manufacturing; six sigma; excel
+B220539CH,Yash Shetty,yash_b220539ch@nitc.ac.in,9686367659,CHE,BTECH,6.64,2,2026,statistics; aspen plus; python; matlab; excel
+B220544CE,Vishnu Mohan,vishnu_b220544ce@nitc.ac.in,9514715765,CE,BTECH,7.66,0,2026,project management; revit; autocad
+B220548ME,Nandana Haque,nandana_b220548me@nitc.ac.in,9520732602,ME,BTECH,7.93,0,2026,cad; ansys; solidworks; six sigma
+B220551CS,Diya Krishnan,diya_b220551cs@nitc.ac.in,9429673845,CSE,BTECH,7.70,0,2026,dbms; machine learning; c++
+B220557CH,Pooja Ahmed,pooja_b220557ch@nitc.ac.in,9625010491,CHE,BTECH,7.37,0,2026,process design; excel; python; aspen plus
+B220559CS,Nila Shetty,nila_b220559cs@nitc.ac.in,9942460175,CSE,BTECH,6.88,0,2026,docker; linux; machine learning; python; algorithms; data structures
+B220564CS,Varun Joseph,varun_b220564cs@nitc.ac.in,9704247172,CSE,BTECH,7.82,0,2026,python; node.js; operating systems; algorithms; c++; system design; java
+B220565EC,Ishita Varma,ishita_b220565ec@nitc.ac.in,9907198896,ECE,BTECH,6.21,0,2026,python; verilog; embedded; computer architecture; signal processing; c
+B220568CE,Meera Joseph,meera_b220568ce@nitc.ac.in,9580387860,CE,BTECH,8.11,0,2026,staad pro; project management; autocad
+M240574EE,Pooja Mohan,pooja_m240574ee@nitc.ac.in,9399705635,EEE,MTECH,8.84,1,2026,matlab; python; simulink; digital design; power systems; excel
+B220580CS,Rahul Haque,rahul_b220580cs@nitc.ac.in,9654795069,CSE,BTECH,7.32,0,2026,node.js; algorithms; dbms
+B220587EE,Ananya Bhat,ananya_b220587ee@nitc.ac.in,9696873579,EEE,BTECH,7.07,0,2026,matlab; excel; plc; c
+B220589CS,Adithya Thomas,adithya_b220589cs@nitc.ac.in,9803921774,CSE,BTECH,8.55,0,2026,dbms; docker; react; linux
+M240592CS,Arjun Chandran,arjun_m240592cs@nitc.ac.in,9288663225,CSE,MTECH,7.74,0,2026,data structures; git; aws; linux; machine learning; c++; node.js
+M240593EE,Abhinav Nambiar,abhinav_m240593ee@nitc.ac.in,9122562204,EEE,MTECH,5.60,0,2026,plc; power systems; verilog; matlab; digital design; python
+B220597ME,Aisha Kurian,aisha_b220597me@nitc.ac.in,9130657595,ME,BTECH,6.78,0,2026,excel; cad; six sigma; solidworks
+B220603EC,Pooja Shetty,pooja_b220603ec@nitc.ac.in,9172496794,ECE,BTECH,7.08,0,2026,linux; fpga; rtos; digital design; matlab; vhdl
+B220606CS,Sneha Gupta,sneha_b220606cs@nitc.ac.in,9576826004,CSE,BTECH,7.86,0,2026,system design; dbms; aws; python
+M240613EE,Varun Das,varun_m240613ee@nitc.ac.in,9578832568,EEE,MTECH,7.64,0,2026,python; digital design; verilog; power systems; embedded; plc
+B220616ME,Varun Mohan,varun_b220616me@nitc.ac.in,9959094667,ME,BTECH,8.28,1,2026,manufacturing; ansys; cad; matlab; six sigma
+B220621CS,Anjali Mathew,anjali_b220621cs@nitc.ac.in,9505913631,CSE,BTECH,8.72,0,2026,operating systems; aws; algorithms; git
+B220625ME,Aisha Varma,aisha_b220625me@nitc.ac.in,9234256254,ME,BTECH,7.47,0,2026,excel; ansys; python; six sigma
+B220629EC,Ananya Kumar,ananya_b220629ec@nitc.ac.in,9462323169,ECE,BTECH,7.69,0,2026,linux; rtos; digital design
+B220631EE,Yash Unni,yash_b220631ee@nitc.ac.in,9906635907,EEE,BTECH,6.14,0,2026,excel; verilog; power systems; plc; embedded
+B220635EC,Sana Gupta,sana_b220635ec@nitc.ac.in,9482496945,ECE,BTECH,7.35,0,2026,linux; embedded; digital design; rtos; python
+B220636CE,Vishnu Thomas,vishnu_b220636ce@nitc.ac.in,9133365557,CE,BTECH,7.91,0,2026,revit; project management; staad pro; python
+B220637EE,Lakshmi Sharma,lakshmi_b220637ee@nitc.ac.in,9103692858,EEE,BTECH,8.66,0,2026,power systems; verilog; simulink; c; digital design; embedded; python
+M240640CS,Sneha Das,sneha_m240640cs@nitc.ac.in,9233803750,CSE,MTECH,7.43,0,2026,linux; node.js; operating systems; c++
+B220644CS,Pooja Prakash,pooja_b220644cs@nitc.ac.in,9554239569,CSE,BTECH,7.42,0,2026,git; system design; c++; java; python; dbms; data structures
+M240648CE,Ananya Das,ananya_m240648ce@nitc.ac.in,9217011682,CE,MTECH,6.31,0,2026,staad pro; revit; autocad; python; project management; excel
+M240655EC,Sneha Kumar,sneha_m240655ec@nitc.ac.in,9907904447,ECE,MTECH,7.92,0,2026,c; python; vhdl; embedded; c++
+B220656CS,Tejas Raj,tejas_b220656cs@nitc.ac.in,9549962734,CSE,BTECH,7.15,0,2026,operating systems; sql; machine learning; linux; algorithms; c++; git
+B220659CS,Sana Das,sana_b220659cs@nitc.ac.in,9574347563,CSE,BTECH,7.20,0,2026,docker; machine learning; system design; aws; operating systems
+B220662CS,Sidharth Kurian,sidharth_b220662cs@nitc.ac.in,9535944827,CSE,BTECH,8.59,1,2026,dbms; machine learning; node.js; aws; linux; java; git
+B220667ME,Abhinav George,abhinav_b220667me@nitc.ac.in,9711387194,ME,BTECH,8.44,0,2026,manufacturing; six sigma; cad; python; matlab
+M240670EC,Abhinav Chandran,abhinav_m240670ec@nitc.ac.in,9861307985,ECE,MTECH,7.32,0,2026,python; matlab; verilog; rtos; computer architecture
+B220677EC,Ananya Pillai,ananya_b220677ec@nitc.ac.in,9334379789,ECE,BTECH,8.22,0,2026,c; python; linux; computer architecture; verilog; embedded
+B220678CS,Shreya Kaimal,shreya_b220678cs@nitc.ac.in,9845980490,CSE,BTECH,8.51,0,2026,java; react; c++; linux; docker; sql; system design
+B220685CH,Arjun Shetty,arjun_b220685ch@nitc.ac.in,9539110763,CHE,BTECH,6.84,0,2026,aspen plus; matlab; python; excel; statistics; process design
+B220692CH,Imran Iyer,imran_b220692ch@nitc.ac.in,9586823089,CHE,BTECH,8.50,0,2026,process design; python; aspen plus; statistics
+B220696CH,Imran Mathew,imran_b220696ch@nitc.ac.in,9561442457,CHE,BTECH,7.33,0,2026,excel; aspen plus; matlab
+B220700CS,Sana Kumar,sana_b220700cs@nitc.ac.in,9514605807,CSE,BTECH,8.14,0,2026,python; aws; java; sql; data structures
+B220701CS,Aarav Rao,aarav_b220701cs@nitc.ac.in,9308761051,CSE,BTECH,8.31,0,2026,algorithms; linux; sql
+M240706EC,Ishita Pillai,ishita_m240706ec@nitc.ac.in,9228515902,ECE,MTECH,7.85,0,2026,c++; fpga; signal processing; computer architecture; embedded; c; linux
+B220710EC,Shreya Iyer,shreya_b220710ec@nitc.ac.in,9245275788,ECE,BTECH,7.40,0,2026,c++; matlab; vhdl; rtos
+B220717EE,Pranav Krishnan,pranav_b220717ee@nitc.ac.in,9587782774,EEE,BTECH,8.48,0,2026,digital design; matlab; python; simulink; embedded
+B220723EC,Vishnu Iyer,vishnu_b220723ec@nitc.ac.in,9404887190,ECE,BTECH,7.65,0,2026,computer architecture; python; vhdl; matlab; c++
+B220729EC,Ananya Kaimal,ananya_b220729ec@nitc.ac.in,9132268051,ECE,BTECH,9.00,0,2026,computer architecture; embedded; digital design; verilog
+B220735CH,Varun Pillai,varun_b220735ch@nitc.ac.in,9835709990,CHE,BTECH,8.29,0,2026,statistics; excel; matlab; aspen plus; python; process design
+B220741EE,Parvathy Reddy,parvathy_b220741ee@nitc.ac.in,9600062678,EEE,BTECH,8.10,0,2026,verilog; power systems; plc; python; matlab; excel; c
+M240746CH,Rahul Haque,rahul_m240746ch@nitc.ac.in,9360868184,CHE,MTECH,7.29,0,2026,python; aspen plus; excel; process design; matlab; statistics
+B220749EC,Lakshmi Das,lakshmi_b220749ec@nitc.ac.in,9852878481,ECE,BTECH,7.81,3,2026,fpga; python; computer architecture; linux; embedded
+B220756EE,Riya Kurian,riya_b220756ee@nitc.ac.in,9495150842,EEE,BTECH,7.67,0,2026,verilog; plc; c; matlab; digital design; power systems
+B220762CE,Kevin Shetty,kevin_b220762ce@nitc.ac.in,9308881609,CE,BTECH,7.94,0,2026,python; staad pro; excel; revit; autocad
+B220766ME,Gayathri Thomas,gayathri_b220766me@nitc.ac.in,9588193973,ME,BTECH,5.60,0,2026,excel; six sigma; python; cad
+B220772CS,Joel Ahmed,joel_b220772cs@nitc.ac.in,9648780970,CSE,BTECH,7.92,0,2026,dbms; machine learning; system design; java; docker; algorithms
+B220773EC,Nila Ahmed,nila_b220773ec@nitc.ac.in,9239056251,ECE,BTECH,7.84,0,2026,signal processing; verilog; digital design
+B220778CS,Varun Thomas,varun_b220778cs@nitc.ac.in,9593711412,CSE,BTECH,7.58,2,2026,algorithms; system design; data structures; react
+B220784CH,Arjun Raj,arjun_b220784ch@nitc.ac.in,9199687364,CHE,BTECH,8.97,0,2026,excel; python; aspen plus; process design; matlab
+B220789EE,Aarav Chandran,aarav_b220789ee@nitc.ac.in,9122588167,EEE,BTECH,7.40,0,2026,power systems; embedded; matlab
+B220794EE,Vishnu Das,vishnu_b220794ee@nitc.ac.in,9334991907,EEE,BTECH,7.58,0,2026,excel; embedded; digital design; simulink
+B220796CS,Rahul Kurian,rahul_b220796cs@nitc.ac.in,9428166719,CSE,BTECH,6.71,0,2026,sql; aws; docker; machine learning; git; java; dbms
+B220797EC,Aarav Varma,aarav_b220797ec@nitc.ac.in,9776316233,ECE,BTECH,7.54,1,2026,verilog; c; linux
+B220800CS,Adithya Sharma,adithya_b220800cs@nitc.ac.in,9362865115,CSE,BTECH,8.00,0,2026,linux; java; node.js; git; c++; operating systems
+M240802CH,Gokul Das,gokul_m240802ch@nitc.ac.in,9464196323,CHE,MTECH,8.57,1,2026,process design; python; statistics; aspen plus
+B220804ME,Amala Ahmed,amala_b220804me@nitc.ac.in,9165941565,ME,BTECH,7.28,0,2026,python; ansys; six sigma
+B220810CE,Vishnu Patil,vishnu_b220810ce@nitc.ac.in,9413530617,CE,BTECH,7.31,0,2026,project management; autocad; staad pro; excel; python
+B220816CH,Neha Haque,neha_b220816ch@nitc.ac.in,9203505960,CHE,BTECH,8.03,0,2026,aspen plus; python; process design; statistics; matlab
+B220823EC,Sana Nair,sana_b220823ec@nitc.ac.in,9878319064,ECE,BTECH,7.04,0,2026,rtos; matlab; embedded; c; digital design
+B220827CS,Adithya Sharma,adithya_b220827cs@nitc.ac.in,9126688409,CSE,BTECH,7.55,0,2026,system design; linux; c++; algorithms; git; operating systems
+B220834CH,Gayathri Menon,gayathri_b220834ch@nitc.ac.in,9266170902,CHE,BTECH,9.25,0,2026,statistics; excel; matlab; process design
+B220838CS,Adithya Patil,adithya_b220838cs@nitc.ac.in,9659331584,CSE,BTECH,7.86,0,2026,machine learning; python; docker; aws; dbms; java; algorithms
+B220839EE,Keerthana Pillai,keerthana_b220839ee@nitc.ac.in,9468206874,EEE,BTECH,8.64,0,2026,verilog; matlab; simulink; digital design; plc; power systems
+B220842CE,Riya Chandran,riya_b220842ce@nitc.ac.in,9649067173,CE,BTECH,9.85,0,2026,revit; python; autocad; excel
+B220847CS,Neha Mathew,neha_b220847cs@nitc.ac.in,9531151807,CSE,BTECH,6.86,0,2026,docker; algorithms; node.js
+M240849CS,Karthik Iyer,karthik_m240849cs@nitc.ac.in,9417421167,CSE,MTECH,5.60,0,2026,dbms; sql; react; aws; c++; data structures
+B220856ME,Varun Krishnan,varun_b220856me@nitc.ac.in,9962609722,ME,BTECH,6.94,2,2026,solidworks; cad; manufacturing
+B220862CS,Devika Nambiar,devika_b220862cs@nitc.ac.in,9389988807,CSE,BTECH,7.40,0,2026,sql; c++; system design
+B220863CS,Gokul Reddy,gokul_b220863cs@nitc.ac.in,9929248006,CSE,BTECH,5.82,0,2026,git; algorithms; python
+B220864CS,Abhinav Nambiar,abhinav_b220864cs@nitc.ac.in,9216777284,CSE,BTECH,9.54,0,2026,node.js; linux; python; c++
+M240867EC,Nila Nambiar,nila_m240867ec@nitc.ac.in,9967297763,ECE,MTECH,8.19,0,2026,rtos; computer architecture; c; vhdl
+B220868EE,Tejas Menon,tejas_b220868ee@nitc.ac.in,9298402505,EEE,BTECH,7.99,0,2026,plc; simulink; c; embedded; verilog; matlab; power systems
+B220875CS,Sana Unni,sana_b220875cs@nitc.ac.in,9621329720,CSE,BTECH,7.35,0,2026,docker; data structures; system design; git; algorithms; aws
+B220876EC,Shreya Kurian,shreya_b220876ec@nitc.ac.in,9912086990,ECE,BTECH,8.29,0,2026,c; computer architecture; fpga; linux; signal processing
+B220877EC,Yash Ahmed,yash_b220877ec@nitc.ac.in,9142416521,ECE,BTECH,7.32,0,2026,c; linux; computer architecture; matlab; python; digital design
+B220883EC,Pooja Nambiar,pooja_b220883ec@nitc.ac.in,9491382886,ECE,BTECH,7.80,0,2026,c++; verilog; c; rtos; python
+M240887CH,Ananya Reddy,ananya_m240887ch@nitc.ac.in,9745967656,CHE,MTECH,8.30,0,2026,matlab; statistics; python; excel
+B220891CS,Pooja Pillai,pooja_b220891cs@nitc.ac.in,9966141117,CSE,BTECH,9.13,0,2026,algorithms; react; docker; operating systems; aws
+B220895CE,Gayathri Menon,gayathri_b220895ce@nitc.ac.in,9104431614,CE,BTECH,7.79,0,2026,staad pro; revit; project management; excel
+B220900EE,Abhinav Rao,abhinav_b220900ee@nitc.ac.in,9714874008,EEE,BTECH,8.90,0,2026,verilog; excel; embedded; matlab; power systems; simulink
+B220901EC,Amala Mathew,amala_b220901ec@nitc.ac.in,9220685271,ECE,BTECH,8.36,0,2026,python; rtos; c++; embedded; matlab; vhdl
+B220906CS,Kevin Suresh,kevin_b220906cs@nitc.ac.in,9193928851,CSE,BTECH,6.44,1,2026,python; git; data structures; linux
+B220911EE,Sneha Kumar,sneha_b220911ee@nitc.ac.in,9507318035,EEE,BTECH,7.70,0,2026,embedded; digital design; excel; matlab; power systems
+B220914ME,Fathima Iyer,fathima_b220914me@nitc.ac.in,9563733462,ME,BTECH,8.58,0,2026,manufacturing; matlab; ansys; cad; excel; solidworks
+B220918ME,Kevin Varma,kevin_b220918me@nitc.ac.in,9915653029,ME,BTECH,8.07,0,2026,cad; manufacturing; ansys
+B220924CH,Kevin George,kevin_b220924ch@nitc.ac.in,9332418699,CHE,BTECH,7.34,0,2026,aspen plus; process design; statistics; python
+M240928CS,Neha Patil,neha_m240928cs@nitc.ac.in,9302439875,CSE,MTECH,7.98,0,2026,node.js; aws; c++; data structures; java; sql; algorithms
+M240933CH,Fathima Chandran,fathima_m240933ch@nitc.ac.in,9761218436,CHE,MTECH,8.03,0,2026,statistics; process design; excel; aspen plus
+B220935CS,Anjali Sharma,anjali_b220935cs@nitc.ac.in,9333174959,CSE,BTECH,7.54,0,2026,docker; data structures; java; aws; machine learning; linux
+M240942EC,Rahul Ahmed,rahul_m240942ec@nitc.ac.in,9911091856,ECE,MTECH,6.48,1,2026,c; c++; rtos
+M240947EC,Riya Rao,riya_m240947ec@nitc.ac.in,9659926251,ECE,MTECH,8.30,0,2026,c; c++; verilog; computer architecture; matlab; linux; signal processing
+B220952EC,Nila Menon,nila_b220952ec@nitc.ac.in,9598500721,ECE,BTECH,8.87,2,2026,verilog; c; computer architecture; linux; digital design; embedded
+B220957EE,Anjali Mohan,anjali_b220957ee@nitc.ac.in,9864719315,EEE,BTECH,8.69,0,2026,plc; simulink; matlab; digital design; excel; power systems; embedded
+B220960CH,Keerthana Sharma,keerthana_b220960ch@nitc.ac.in,9476987160,CHE,BTECH,8.06,0,2026,excel; matlab; process design; aspen plus; statistics; python
+B220961EC,Yash Kumar,yash_b220961ec@nitc.ac.in,9770001977,ECE,BTECH,7.86,0,2026,computer architecture; vhdl; digital design; linux
+B220964CE,Amala Kumar,amala_b220964ce@nitc.ac.in,9790004865,CE,BTECH,6.84,0,2026,staad pro; revit; python; autocad
+B220968EC,Tejas Reddy,tejas_b220968ec@nitc.ac.in,9409809574,ECE,BTECH,9.23,0,2026,python; digital design; c++
+B220971CS,Manu Menon,manu_b220971cs@nitc.ac.in,9660420450,CSE,BTECH,7.36,0,2026,system design; node.js; aws
+B220977CE,Karthik Raj,karthik_b220977ce@nitc.ac.in,9857155232,CE,BTECH,8.28,0,2026,excel; revit; autocad; python; staad pro
+M240980CS,Neha Nambiar,neha_m240980cs@nitc.ac.in,9767166857,CSE,MTECH,7.91,0,2026,operating systems; c++; docker; dbms; git; system design
+M240983EE,Lakshmi Thomas,lakshmi_m240983ee@nitc.ac.in,9584392763,EEE,MTECH,8.67,1,2026,c; matlab; digital design; embedded; excel
+B220990EC,Ishita Patil,ishita_b220990ec@nitc.ac.in,9562813149,ECE,BTECH,6.93,1,2026,signal processing; linux; c; vhdl; digital design
+B220992CE,Parvathy Mathew,parvathy_b220992ce@nitc.ac.in,9980856433,CE,BTECH,6.73,3,2026,revit; staad pro; autocad; project management; python
+B220995EE,Fathima Chandran,fathima_b220995ee@nitc.ac.in,9256126208,EEE,BTECH,6.52,0,2026,power systems; plc; digital design; python; matlab; c
+B220999CH,Neha Kurian,neha_b220999ch@nitc.ac.in,9688314373,CHE,BTECH,8.52,1,2026,matlab; process design; excel
+B221002EC,Ishita Menon,ishita_b221002ec@nitc.ac.in,9992025017,ECE,BTECH,8.16,0,2026,linux; rtos; computer architecture; matlab; digital design; vhdl
+B221006EE,Manu Joseph,manu_b221006ee@nitc.ac.in,9439829844,EEE,BTECH,6.51,0,2026,plc; simulink; digital design; python; c; excel; embedded
+B221007EE,Shreya Rao,shreya_b221007ee@nitc.ac.in,9174763036,EEE,BTECH,8.39,0,2026,digital design; matlab; excel; python; embedded; simulink

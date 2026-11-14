@@ -1,0 +1,59 @@
+# HireFlo (DriveOps): PostgreSQL (or Neon) + FastAPI backend + React frontend (nginx).
+#   docker compose up --build        then open http://localhost:8080
+# The first start seeds a fictional demo batch. Re-seed for a fresh drive day:
+#   docker compose exec backend python -m app.seed --reset
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: driveops
+      POSTGRES_USER: driveops
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-driveops-local}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U driveops -d driveops"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  backend:
+    build: ./backend
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # Set DATABASE_URL in a .env next to this file to use Neon instead of the local db container.
+      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg://driveops:${POSTGRES_PASSWORD:-driveops-local}@db:5432/driveops}
+      SECRET_KEY: ${SECRET_KEY:-change-me-local-docker-secret-key-0123456789}
+      DEMO_MODE: ${DEMO_MODE:-true}
+      PUBLIC_URL: ${PUBLIC_URL:-http://localhost:8080}
+      CORS_ORIGINS: ${PUBLIC_URL:-http://localhost:8080}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      UPLOAD_DIR: /srv/backend/data/uploads
+      SEED_ON_START: "true"
+      LLM_PROVIDER: ${LLM_PROVIDER:-none}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_MODEL: ${LLM_MODEL:-claude-haiku-5-5}
+      LLM_BASE_URL: ${LLM_BASE_URL:-}
+      AZURE_OPENAI_ENDPOINT: ${AZURE_OPENAI_ENDPOINT:-}
+      AZURE_OPENAI_API_KEY: ${AZURE_OPENAI_API_KEY:-}
+      AZURE_OPENAI_DEPLOYMENT: ${AZURE_OPENAI_DEPLOYMENT:-}
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      GROQ_MODEL: ${GROQ_MODEL:-llama-3.3-70b-versatile}
+    volumes:
+      - uploads:/srv/backend/data/uploads
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build: ./frontend
+    depends_on:
+      - backend
+    ports:
+      - "8080:80"
+
+volumes:
+  pgdata:
+  uploads:

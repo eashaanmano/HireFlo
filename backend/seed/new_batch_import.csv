@@ -1,0 +1,25 @@
+Roll Number,Student Name,Institute Email,Mobile,Department,Degree,CPI,Active Backlogs,Batch,Key Skills
+MS250100,Neha Unni,neha_ms250100@nitc.ac.in,9301080127,CSE,MSC,7.18,0,2026,operating systems; aws; algorithms; data structures
+MC250101,Arjun Haque,arjun_mc250101@nitc.ac.in,9586132631,CSE,MCA,7.18,0,2026,docker; linux; dbms; react
+MC250102,Rahul Mohan,rahul_mc250102@nitc.ac.in,9314585709,CSE,MCA,6.82,0,2026,c++; operating systems; java; data structures
+MS250103,Adithya Mohan,adithya_ms250103@nitc.ac.in,9247979471,CSE,MSC,8.25,0,2026,docker; system design; node.js; data structures
+MC250104,Anjali Krishnan,anjali_mc250104@nitc.ac.in,9435875105,CSE,MCA,7.99,0,2026,linux; git; data structures; aws
+MC250105,Manu Suresh,,9462690299,CSE,MCA,8.48,0,2026,machine learning; data structures; operating systems; java
+MS250106,Diya Pillai,diya_ms250106@nitc.ac.in,9513560480,CSE,MSC,8.15,0,2026,node.js; aws; operating systems; sql
+MC250107,Sana Iyer,sana_mc250107@nitc.ac.in,9250948857,CSE,MCA,7.74,0,2026,linux; git; react; node.js
+MC250108,Nila Chandran,nila_mc250108@nitc.ac.in,9395205601,CSE,MCA,7.03,0,2026,sql; java; node.js; operating systems
+MC250108,Lakshmi Haque,lakshmi_ms250109@nitc.ac.in,9781693229,CSE,MSC,7.94,0,2026,docker; linux; aws; data structures
+MC250110,Keerthana Haque,keerthana_mc250110@nitc.ac.in,9181226243,CSE,MCA,7.32,0,2026,aws; sql; c++; linux
+MC250111,Meera Varma,meera_mc250111@nitc.ac.in,9911617441,CSE,MCA,7.21,0,2026,react; system design; algorithms; data structures
+MS250112,Akash Pillai,akash_ms250112@nitc.ac.in,9343061710,CSE,MSC,6.92,0,2026,aws; react; linux; system design
+MC250113,Aarav Kurian,aarav_mc250113@nitc.ac.in,9339234015,CSE,MCA,8.87,0,2026,git; react; c++; algorithms
+MC250114,Adithya Kurian,adithya_mc250114@nitc.ac.in,9988476712,CSE,MCA,"8,4",0,2026,sql; react; git; linux
+MS250115,Rohan Reddy,rohan_ms250115@nitc.ac.in,9718952972,CSE,MSC,6.68,0,2026,docker; aws; algorithms; java
+MC250116,Yash Kurian,yash_mc250116@nitc.ac.in,9847082107,CSE,MCA,8.25,0,2026,dbms; system design; data structures; react
+MC250117,Joel Nambiar,joel_mc250117@nitc.ac.in,9939093154,CSE,MCA,8.75,0,2026,system design; docker; c++; dbms
+MS250118,Akash Nambiar,akash_ms250118@nitc.ac.in,9246285197,CSE,MSC,7.49,0,2026,react; python; system design; machine learning
+MC250119,Keerthana Mathew,keerthana_mc250119@nitc.ac.in,9253258699,Mech Engg,MCA,7.59,0,2026,c++; java; git; dbms
+MC250120,Abhinav Varma,abhinav_mc250120@nitc.ac.in,9522601200,CSE,MCA,9.11,0,2026,dbms; algorithms; sql; node.js
+MS250121,Nandana Kaimal,nandana_ms250121@nitc.ac.in,9163697947,CSE,MSC,6.93,0,2026,c++; python; machine learning; node.js
+MC250122,Sneha Bhat,sneha_mc250122@nitc.ac.in,9932130861,CSE,MCA,7.59,0,2026,operating systems; docker; python; node.js
+MC250123,Hari Nambiar,hari_mc250123@nitc.ac.in,9978435118,CSE,MCA,8.29,0,2026,data structures; python; aws; dbms

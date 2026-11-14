@@ -1,0 +1,38 @@
+# Secrets: never commit real keys (the templates are fine)
+.env
+**/.env
+**/.env.local
+!**/.env.example
+
+# Local data: SQLite database, uploaded resumes, generated demo links
+backend/data/
+*.db
+*.sqlite3
+backend/seed/demo_links.txt
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Node
+node_modules/
+frontend/dist/
+coverage/
+
+# Archives and logs
+*.zip
+*.log
+
+# Editors / OS
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
