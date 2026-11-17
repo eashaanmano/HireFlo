@@ -57,6 +57,14 @@ class Settings(BaseSettings):
     llm_extract_provider: Literal["auto", "azure", "groq", "generic"] = "auto"
     llm_timeout_sec: float = 30.0
     assistant_enabled: bool = True
+    # LangSmith tracing of every AI workflow (see services/tracing.py). Off unless LANGSMITH_TRACING=true and a key
+    # is set. Destination: an agent (agent-based workspaces) or, without one, a project.
+    langsmith_tracing: bool = False
+    langsmith_api_key: str = ""
+    langsmith_endpoint: str = "https://api.smith.langchain.com"
+    langsmith_agent_id: str = ""
+    langsmith_agent_environment: str = ""
+    langsmith_project: str = ""
     smtp_host: str = ""
     smtp_port: int = 587
     smtp_user: str = ""
@@ -90,6 +98,10 @@ class Settings(BaseSettings):
     @property
     def llm_enabled(self) -> bool:
         return self.azure_enabled or self.groq_enabled or self.generic_llm_enabled
+
+    @property
+    def langsmith_enabled(self) -> bool:
+        return self.langsmith_tracing and bool(self.langsmith_api_key)
 
 
 @lru_cache

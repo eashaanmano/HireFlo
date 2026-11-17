@@ -1,8 +1,10 @@
 """One small client for every LLM HireFlo can use, with task routing and fall-back.
 
 Providers (configure any subset in backend/.env):
-* **azure**: Azure OpenAI in Microsoft Foundry, via the v1 API (``<endpoint>/openai/v1/chat/completions``,
-  ``api-key`` header, the deployment name as the model).
+* **azure**: Azure OpenAI in Microsoft Foundry (e.g. a gpt-4.1-mini deployment), through the official ``openai``
+  Python SDK on Azure's v1 API: ``OpenAI(base_url="<endpoint>/openai/v1/", api_key=...)`` with the *deployment
+  name* as the model. The SDK adds retries with back-off on 429/5xx and typed errors. If the package isn't
+  installed, the same v1 endpoint is called over plain HTTPS instead.
 * **groq**: Groq's OpenAI-compatible API, very fast, free tier.
 * **generic**: the older LLM_PROVIDER setting (Anthropic, or any OpenAI-compatible base URL).
 
@@ -11,19 +13,27 @@ chat prefers Groq for speed, then Azure, then generic. If a provider fails, the 
 or an exhausted free tier degrades the feature instead of breaking it.
 
 Nothing here logs prompts or keys. Callers decide what data goes into a prompt (see services/assistant.py).
+With LangSmith configured, every provider attempt is traced as an ``llm`` run (services/tracing.py): the request
+body and the reply, never the provider's headers or key.
 """
 from __future__ import annotations
 
 import json
 import logging
 import time
-from collections.abc import Iterator
+from collections.abc import Iterator, Mapping
 from dataclasses import dataclass, field, replace
 from typing import Any, Literal
 
 import httpx
 
 from ..core.config import Settings, get_settings
+from . import tracing
+
+try:  # official SDK for Azure OpenAI (v1 API); optional so the app still runs without it
+    import openai as _openai
+except ImportError:  # pragma: no cover - exercised only when the package is missing
+    _openai = None  # type: ignore[assignment]
 
 log = logging.getLogger("driveops.llm")
 
@@ -66,6 +76,42 @@ def azure_url(endpoint: str) -> str:
         if base.endswith(tail):
             base = base[: -len(tail)]
     return f"{base}/openai/v1/chat/completions"
+
+
+def azure_base_url(endpoint: str) -> str:
+    """Base URL for the OpenAI SDK: ``https://<resource>.openai.azure.com/openai/v1/``."""
+    return azure_url(endpoint)[: -len("chat/completions")]
+
+
+def sdk_available() -> bool:
+    return _openai is not None
+
+
+_CLIENTS: dict[tuple[str, str], Any] = {}
+
+
+def _azure_client(p: Provider) -> Any:
+    """One cached SDK client per endpoint and key (the client keeps a connection pool)."""
+    key = (p.url, p.headers.get("api-key", ""))
+    client = _CLIENTS.get(key)
+    if client is None:
+        client = _openai.OpenAI(base_url=p.url[: -len("chat/completions")], api_key=key[1], max_retries=2)
+        _CLIENTS.clear()  # keys rarely change; keep only the current client
+        _CLIENTS[key] = client
+    return client
+
+
+def _sdk_error(p: Provider, exc: Exception) -> LLMError:
+    """Map SDK errors onto the same "<name> HTTP <status>: <message>" shape as the HTTP path."""
+    if _openai is not None and isinstance(exc, _openai.APIStatusError):
+        return LLMError(f"{p.name} HTTP {exc.status_code}: {str(exc.message)[:300]}")
+    if _openai is not None and isinstance(exc, _openai.APITimeoutError):
+        return LLMError(f"{p.name} timed out")
+    return LLMError(f"{p.name} connection failed: {str(exc)[:200]}")
+
+
+def _uses_sdk(p: Provider) -> bool:
+    return p.name == "azure" and _openai is not None
 
 
 def providers(settings: Settings | None = None) -> dict[str, Provider]:
@@ -151,10 +197,40 @@ def _relax(body: dict[str, Any], error_text: str) -> dict[str, Any] | None:
 
 
 def _post(p: Provider, body: dict[str, Any], timeout: float) -> dict[str, Any]:
+    if _uses_sdk(p):
+        try:
+            resp = _azure_client(p).chat.completions.create(**body, timeout=timeout)
+        except _openai.OpenAIError as exc:
+            raise _sdk_error(p, exc) from exc
+        return resp.model_dump()
     r = httpx.post(p.url, headers={**p.headers, "content-type": "application/json"}, json=body, timeout=timeout)
     if r.status_code >= 400:
         raise LLMError(f"{p.name} HTTP {r.status_code}: {r.text[:300]}")
     return r.json()
+
+
+# ---------------------------------------------------------------- tracing (LangSmith, see services/tracing.py)
+def _request(inputs: Mapping[str, Any]) -> dict[str, Any]:
+    """An LLM run's input is the request body the provider receives, never the Provider (it holds the key)."""
+    return dict(inputs.get("body") or {})
+
+
+def _run(p: Provider) -> dict[str, Any]:
+    """Name each LLM run after its provider and model, with the metadata LangSmith prices tokens by."""
+    return {"name": p.label, "metadata": tracing.llm_metadata(p.name, p.style, p.model)}
+
+
+# langsmith_extra (the run's name and metadata) is consumed by the decorator; the bodies never see it.
+@tracing.traceable(run_type="llm", name="llm", process_inputs=_request, process_outputs=tracing.llm_outputs)
+def _traced_post(p: Provider, body: dict[str, Any], timeout: float,
+                 langsmith_extra: Mapping[str, Any] | None = None) -> dict[str, Any]:
+    return _post(p, body, timeout)
+
+
+@tracing.traceable(run_type="llm", name="llm", process_inputs=_request, reduce_fn=tracing.joined_message)
+def _traced_stream(p: Provider, body: dict[str, Any], timeout: float,
+                   langsmith_extra: Mapping[str, Any] | None = None) -> Iterator[str]:
+    yield from _deltas(p, _stream_lines(p, body, timeout))
 
 
 def _text(p: Provider, data: dict[str, Any]) -> str:
@@ -171,12 +247,12 @@ def _call(p: Provider, messages: list[Message], max_tokens: int, temperature: fl
           timeout: float) -> str:
     body = _body(p, messages, max_tokens, temperature, json_mode, stream=False)
     try:
-        return _text(p, _post(p, body, timeout))
+        return _text(p, _traced_post(p, body, timeout, langsmith_extra=_run(p)))
     except LLMError as exc:
         relaxed = _relax(body, str(exc)) if " 400" in str(exc) else None
         if relaxed is None:
             raise
-        return _text(p, _post(p, relaxed, timeout))
+        return _text(p, _traced_post(p, relaxed, timeout, langsmith_extra=_run(p)))
 
 
 def complete(messages: list[Message], task: Task = "rewrite", *, max_tokens: int = 800,
@@ -201,6 +277,16 @@ def complete(messages: list[Message], task: Task = "rewrite", *, max_tokens: int
 
 # ---------------------------------------------------------------- streaming (chat)
 def _stream_lines(p: Provider, body: dict[str, Any], timeout: float) -> Iterator[str]:
+    if _uses_sdk(p):
+        # Re-emit SDK chunks as server-sent-event lines so one parser (_deltas) serves every provider.
+        try:
+            chunks = _azure_client(p).chat.completions.create(**body, timeout=timeout)
+            for chunk in chunks:
+                yield "data: " + chunk.model_dump_json()
+        except _openai.OpenAIError as exc:
+            raise _sdk_error(p, exc) from exc
+        yield "data: [DONE]"
+        return
     with httpx.stream("POST", p.url, headers={**p.headers, "content-type": "application/json"}, json=body,
                       timeout=timeout) as r:
         if r.status_code >= 400:
@@ -245,14 +331,14 @@ def stream(messages: list[Message], task: Task = "chat", *, max_tokens: int = 70
                 continue
         body = _body(p, messages, max_tokens, temperature, False, stream=True)
         try:
-            gen = _deltas(p, _stream_lines(p, body, s.llm_timeout_sec))
+            gen = _traced_stream(p, body, s.llm_timeout_sec, langsmith_extra=_run(p))
             first = next(gen, None)
         except LLMError as exc:
             relaxed = _relax(body, str(exc)) if " 400" in str(exc) else None
             try:
                 if relaxed is None:
                     raise
-                gen = _deltas(p, _stream_lines(p, relaxed, s.llm_timeout_sec))
+                gen = _traced_stream(p, relaxed, s.llm_timeout_sec, langsmith_extra=_run(p))
                 first = next(gen, None)
             except (LLMError, httpx.HTTPError) as exc2:
                 log.warning("LLM stream %s failed: %s", p.label, str(exc2)[:200])
@@ -282,12 +368,15 @@ def status(settings: Settings | None = None) -> dict[str, Any]:
     s = settings or get_settings()
     avail = providers(s)
     return {
-        "configured": [{"name": p.name, "model": p.model} for p in avail.values()],
+        "configured": [{"name": p.name, "model": p.model, "client": "openai-sdk" if _uses_sdk(p) else "https"}
+                       for p in avail.values()],
         "routing": {t: [p.label for p in route(t, s)] for t in _AUTO},
         "assistant_enabled": s.assistant_enabled,
+        "tracing": tracing.status(),
     }
 
 
+@tracing.traceable(run_type="chain", name="llm_connection_test", process_inputs=tracing.only())
 def test_providers(settings: Settings | None = None) -> list[dict[str, Any]]:
     """Ask each configured provider for a one-word reply. Errors are shortened and never include keys."""
     s = settings or get_settings()

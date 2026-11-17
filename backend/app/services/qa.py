@@ -2,7 +2,8 @@
 
 Answers are computed by the same policy engine that decides eligibility, so the assistant can never
 contradict the system. When an LLM is configured it only rewrites the computed answer in plainer words;
-citations always come from the engine.
+citations always come from the engine. With LangSmith on, each question is a ``policy_qa`` trace holding the
+engine's answer (``policy_engine``) and the LLM rewrite; only the question is recorded as input, never the student.
 """
 from __future__ import annotations
 
@@ -16,7 +17,7 @@ from sqlalchemy.orm import Session
 
 from ..core.config import get_settings
 from ..models import Drive, DriveStatus, Student
-from . import llm
+from . import llm, tracing
 from .eligibility import StudentProfile, evaluate, rule_specs
 from .policy import PolicyConfig, active_policy, placement_for
 
@@ -60,6 +61,7 @@ def _cite(cfg: PolicyConfig, *codes: str) -> list[dict[str, str]]:
     return [rules[c] for c in codes if c in rules]
 
 
+@tracing.traceable(run_type="tool", name="policy_engine", process_inputs=tracing.only("question"))
 def answer_question(db: Session, student: Student, question: str) -> Answer:
     _, cfg = active_policy(db)
     placement = placement_for(db, student.id, cfg)
@@ -138,6 +140,7 @@ def answer_question(db: Session, student: Student, question: str) -> Answer:
                   cfg.describe(), engine="policy-engine")
 
 
+@tracing.traceable(run_type="chain", name="policy_qa", process_inputs=tracing.only("question"))
 def answer(db: Session, student: Student, question: str) -> Answer:
     base = answer_question(db, student, question)
     settings = get_settings()

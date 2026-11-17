@@ -11,6 +11,10 @@ How it stays trustworthy
   students, because the model is an outside service.
 * **Works without an LLM.** With no provider configured, students get the policy engine's answer and the cell
   gets a short summary, so the feature still demonstrates something useful.
+* **Traced end to end.** With LangSmith on (services/tracing.py) each reply is one trace, ``assistant.student`` or
+  ``assistant.cell``, that stays open while the answer streams: the grounding context, the policy engine's answer
+  and the LLM call are its children and the full answer is its output. The trace holds the chat history and the
+  same context the model sees (so no identities either), never the database session or ORM rows.
 """
 from __future__ import annotations
 
@@ -36,7 +40,7 @@ from ..models import (
     SlotStatus,
     Student,
 )
-from . import llm, qa
+from . import llm, qa, tracing
 from .policy import active_policy, placement_for
 
 VISIBLE = (DriveStatus.open, DriveStatus.closed, DriveStatus.live)
@@ -69,6 +73,22 @@ class Reply:
     pieces: Iterator[str]
 
 
+def _chat_inputs(inputs: dict[str, Any]) -> dict[str, Any]:
+    history = inputs.get("history") or []
+    return {"question": history[-1]["content"] if history else "", "history": history}
+
+
+def _chat_outputs(items: list[str]) -> dict[str, Any]:
+    """``reduce_fn`` for a traced reply: the first item is the provider label, the rest is the answer."""
+    return {"provider": items[0] if items else None, "answer": "".join(items[1:])}
+
+
+def _start(flow: Iterator[str]) -> Reply:
+    """Run a reply flow up to its first item (the provider), leaving the answer to stream."""
+    provider = next(flow, "summary")
+    return Reply(provider, flow)
+
+
 def _ist(dt: Any) -> str | None:
     if dt is None:
         return None
@@ -90,6 +110,7 @@ def clean_history(messages: list[dict[str, str]]) -> list[dict[str, str]]:
 
 
 # ---------------------------------------------------------------- student context
+@tracing.traceable(run_type="tool", name="grounding_context", process_inputs=tracing.only())
 def student_context(db: Session, student: Student) -> dict[str, Any]:
     _, cfg = active_policy(db)
     placement = placement_for(db, student.id, cfg)
@@ -142,13 +163,22 @@ def _engine_answer(db: Session, student: Student, question: str) -> qa.Answer | 
 
 
 def student_reply(db: Session, student: Student, messages: list[dict[str, str]]) -> Reply:
-    history = clean_history(messages)
+    history = clean_history(messages)  # raises ValueError before anything is traced
+    return _start(_student_flow(db, student, history))
+
+
+@tracing.traceable(run_type="chain", name="assistant.student", process_inputs=_chat_inputs,
+                   reduce_fn=_chat_outputs, metadata={"audience": "student"})
+def _student_flow(db: Session, student: Student, history: list[dict[str, str]]) -> Iterator[str]:
+    """Yields the provider label, then the answer's pieces. Everything before the first yield runs inside
+    student_reply (while the request's database session is open); the rest streams to the client."""
     question = history[-1]["content"]
     engine = _engine_answer(db, student, question)
     s = get_settings()
     if not (s.llm_enabled and s.assistant_enabled):
-        text = engine.answer if engine else qa.answer_question(db, student, question).answer
-        return Reply("policy-engine", iter([text]))
+        yield "policy-engine"
+        yield engine.answer if engine else qa.answer_question(db, student, question).answer
+        return
     ctx = student_context(db, student)
     system = STUDENT_SYSTEM + "\n\nCONTEXT (JSON):\n" + json.dumps(ctx, default=str)
     if engine:
@@ -156,14 +186,17 @@ def student_reply(db: Session, student: Student, messages: list[dict[str, str]])
                    + (" Codes: " + ", ".join(c["code"] for c in engine.citations) if engine.citations else ""))
     try:
         provider, pieces = llm.stream([{"role": "system", "content": system}, *history], "chat")
-        return Reply(provider, pieces)
     except llm.LLMError:
-        text = engine.answer if engine else ("The assistant can't reach its language model right now. "
-                                             "Your drives, eligibility and offers are on the Drives and Offers pages.")
-        return Reply("policy-engine", iter([text]))
+        yield "policy-engine"
+        yield engine.answer if engine else ("The assistant can't reach its language model right now. "
+                                            "Your drives, eligibility and offers are on the Drives and Offers pages.")
+        return
+    yield provider
+    yield from pieces
 
 
 # ---------------------------------------------------------------- cell context (aggregates only)
+@tracing.traceable(run_type="tool", name="grounding_context", process_inputs=tracing.only())
 def cell_context(db: Session) -> dict[str, Any]:
     from . import forecast, insights
 
@@ -216,20 +249,30 @@ def _top_reasons(warnings: list[dict[str, Any]]) -> dict[str, int]:
 
 
 def cell_reply(db: Session, messages: list[dict[str, str]]) -> Reply:
-    history = clean_history(messages)
+    history = clean_history(messages)  # raises ValueError before anything is traced
+    return _start(_cell_flow(db, history))
+
+
+@tracing.traceable(run_type="chain", name="assistant.cell", process_inputs=_chat_inputs,
+                   reduce_fn=_chat_outputs, metadata={"audience": "cell"})
+def _cell_flow(db: Session, history: list[dict[str, str]]) -> Iterator[str]:
+    """Yields the provider label, then the answer's pieces (see _student_flow)."""
     s = get_settings()
     ctx = cell_context(db)
     if not (s.llm_enabled and s.assistant_enabled):
         sea = ctx["season"]
-        text = (f"No language model is configured, so here is the season at a glance: {sea['placed']} of "
-                f"{sea['students']} students placed ({sea['placed_pct']}%), {sea['offers']} offers, "
-                f"{sea['active_drives']} active drives, {ctx['early_warning']['flagged']} early-warning flags and "
-                f"{ctx['inbox']['items']} inbox items. Add AZURE_OPENAI_* or GROQ_API_KEY to backend/.env to chat.")
-        return Reply("summary", iter([text]))
+        yield "summary"
+        yield (f"No language model is configured, so here is the season at a glance: {sea['placed']} of "
+               f"{sea['students']} students placed ({sea['placed_pct']}%), {sea['offers']} offers, "
+               f"{sea['active_drives']} active drives, {ctx['early_warning']['flagged']} early-warning flags and "
+               f"{ctx['inbox']['items']} inbox items. Add AZURE_OPENAI_* or GROQ_API_KEY to backend/.env to chat.")
+        return
     system = CELL_SYSTEM + "\n\nCONTEXT (JSON):\n" + json.dumps(ctx, default=str)
     try:
         provider, pieces = llm.stream([{"role": "system", "content": system}, *history], "chat")
-        return Reply(provider, pieces)
     except llm.LLMError:
-        return Reply("summary", iter(["The assistant can't reach its language model right now. The Insights page "
-                                      "has the same figures."]))
+        yield "summary"
+        yield "The assistant can't reach its language model right now. The Insights page has the same figures."
+        return
+    yield provider
+    yield from pieces

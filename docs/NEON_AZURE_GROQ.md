@@ -59,19 +59,28 @@ cents for a whole demo.
    **Azure OpenAI** → *Create*. Choose your student subscription, a new resource group (`hireflo-rg`), a region
    **from your allowed list**, a name (`hireflo-ai`) and pricing tier *Standard S0*.
 4. **Deploy a model.** In Foundry: *Models + endpoints* (or *Build → Models*) → **Deploy model** → pick
-   `gpt-4o-mini` (or `gpt-4.1-mini`) → deployment type *Global Standard* → name the deployment, e.g. `gpt-4o-mini`.
+   `gpt-4.1-mini` (or `gpt-4o-mini`) → deployment type *Global Standard* → name the deployment, e.g. `gpt-4.1-mini`.
 5. **Copy endpoint and key.** In the portal open the resource → **Keys and Endpoint**. Copy *KEY 1* and the
    *Endpoint* (`https://hireflo-ai.openai.azure.com/`).
-6. **Add to `backend/.env`:**
+6. **Install the SDK** (once, from `backend` with the venv active): `pip install -r requirements.txt`.
+   HireFlo calls Azure through the official `openai` package on the v1 API
+   (`OpenAI(base_url="<endpoint>/openai/v1/", api_key=...)`, no `api-version` needed).
+7. **Add to `backend/.env`:**
 
    ```
    AZURE_OPENAI_ENDPOINT=https://hireflo-ai.openai.azure.com/
    AZURE_OPENAI_API_KEY=<KEY 1>
-   AZURE_OPENAI_DEPLOYMENT=gpt-4o-mini
+   AZURE_OPENAI_DEPLOYMENT=gpt-4.1-mini
    ```
 
-   The deployment name is the one *you* typed in step 4. A Foundry project endpoint
+   The deployment name is the one *you* typed in step 4 (for example `gpt-4.1-mini`). A Foundry project endpoint
    (`https://x.services.ai.azure.com/api/projects/...`) also works.
+8. **Check it.** Restart the backend, then in the placement-cell UI press the AI *Test* button (or
+   `POST /api/cell/llm/test`). `GET /api/cell/llm/status` should list `azure` with `"client": "openai-sdk"`; if it
+   says `"https"`, the `openai` package isn't installed in the venv the server runs from.
+
+   With only Azure configured, every AI feature uses it: JD extraction, the assistant chat (streamed) and the
+   plain-language rewrite of policy answers. Add Groq too and chat moves to Groq for speed, with Azure as fall-back.
 
 If it doesn't work
 * **`RequestDisallowedByAzure` when creating the resource:** the region isn't in your allowed list (step 2).
@@ -130,3 +139,42 @@ lists what HireFlo found; **Test** sends a one-word request to each and shows th
 
 Questions and answers are not stored on the server (the chat lives in the browser tab). The audit log records only
 that the assistant was used and which provider answered.
+
+---
+
+## 6. LangSmith tracing (optional)
+
+With LangSmith on, every AI workflow in HireFlo becomes a trace you can open at **smith.langchain.com**:
+
+| Trace | What's inside |
+| --- | --- |
+| `assistant.student` | grounding context, the policy engine's answer, the streamed LLM call; output = the full answer |
+| `assistant.cell` | grounding context (aggregates), the streamed LLM call; output = the full answer |
+| `policy_qa` | the policy engine's answer and the LLM rewrite of it |
+| `jd_extraction` | the pattern extractor, the LLM call, JSON parsing and validation |
+| `llm_connection_test` | one LLM call per provider (the cell's AI *Test* button) |
+
+Each LLM call is an `llm` run named after its provider and model (`azure:gpt-4.1-mini`, `groq:llama-3.3-70b-versatile`)
+with the request, the reply, latency, token usage (non-streamed calls) and the error if it failed. A fall-back shows
+as a failed attempt followed by the provider that answered.
+
+1. In LangSmith open **Settings → API Keys** and create a key.
+2. Add to `backend/.env`:
+
+   ```
+   LANGSMITH_TRACING=true
+   LANGSMITH_API_KEY=lsv2_...
+   LANGSMITH_ENDPOINT=https://api.smith.langchain.com
+   # agent-based workspace
+   LANGSMITH_AGENT_ID=hireflo
+   LANGSMITH_AGENT_ENVIRONMENT=local
+   # or, for a project-based / self-hosted workspace, instead of the two lines above:
+   # LANGSMITH_PROJECT=hireflo
+   ```
+
+3. Install the SDK (`pip install -r requirements.txt`), restart the API and ask the assistant something.
+   `GET /api/cell/llm/status` shows `"tracing": {"enabled": true, "destination": "agent hireflo (local)"}`.
+
+Privacy: LangSmith receives exactly what the LLM provider receives (section 5), plus the deterministic steps' results.
+Inputs are reduced to the question, chat history, JD text or context; database sessions, student records, Settings
+and API keys are never recorded. Tests never send traces. Set `LANGSMITH_TRACING=false` to switch it off.

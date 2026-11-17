@@ -177,3 +177,76 @@ def test_migrate_copies_everything_and_refuses_to_overwrite(tmp_path: Path) -> N
     with pytest.raises(SystemExit):
         migrate(src_url, dst_url, log=lambda *_: None)
     assert migrate(src_url, dst_url, replace=True, log=lambda *_: None)["students"] == 3
+
+
+# ---------------------------------------------------------------- Azure through the openai SDK
+def test_azure_base_url_for_the_sdk() -> None:
+    assert llm.azure_base_url("https://hf.openai.azure.com") == "https://hf.openai.azure.com/openai/v1/"
+    assert llm.azure_base_url("https://hf.openai.azure.com/openai/v1/") == "https://hf.openai.azure.com/openai/v1/"
+
+
+class _FakeResp:
+    def __init__(self, text: str) -> None:
+        self.text = text
+
+    def model_dump(self) -> dict:
+        return {"choices": [{"message": {"content": self.text}}]}
+
+
+class _FakeChunk:
+    def __init__(self, piece: str | None) -> None:
+        self.piece = piece
+
+    def model_dump_json(self) -> str:
+        return json.dumps({"choices": [] if self.piece is None else [{"delta": {"content": self.piece}}]})
+
+
+class _FakeCompletions:
+    def __init__(self, fail: Exception | None = None) -> None:
+        self.calls: list[dict] = []
+        self.fail = fail
+
+    def create(self, **kw: object) -> object:
+        self.calls.append(kw)
+        if self.fail:
+            raise self.fail
+        if kw.get("stream"):
+            return iter([_FakeChunk(None), _FakeChunk("Hel"), _FakeChunk("lo")])
+        return _FakeResp(" OK ")
+
+
+class _FakeClient:
+    def __init__(self, comp: _FakeCompletions) -> None:
+        self.chat = type("Chat", (), {"completions": comp})()
+
+
+def test_azure_uses_the_openai_sdk_with_the_deployment_as_model(monkeypatch: pytest.MonkeyPatch) -> None:
+    pytest.importorskip("openai")
+    comp = _FakeCompletions()
+    monkeypatch.setattr(llm, "_azure_client", lambda p: _FakeClient(comp))
+    s = _settings(**{**AZ, "azure_openai_deployment": "gpt-4.1-mini"})
+    out = llm.complete([{"role": "user", "content": "hi"}], "extract", settings=s)
+    assert out.text == "OK" and out.provider == "azure:gpt-4.1-mini"
+    assert comp.calls[0]["model"] == "gpt-4.1-mini" and "max_completion_tokens" in comp.calls[0]
+    label, pieces = llm.stream([{"role": "user", "content": "x"}], settings=s)
+    assert label == "azure:gpt-4.1-mini" and "".join(pieces) == "Hello"
+    assert llm.status(s)["configured"][0]["client"] == "openai-sdk"
+
+
+def test_azure_sdk_errors_fall_back_to_groq(monkeypatch: pytest.MonkeyPatch) -> None:
+    openai = pytest.importorskip("openai")
+    http = pytest.importorskip("httpx2")  # openai 3.x builds its errors on httpx2
+
+    err = openai.RateLimitError("Rate limit", response=http.Response(429, request=http.Request("POST", "https://x")),
+                                body=None)
+    monkeypatch.setattr(llm, "_azure_client", lambda p: _FakeClient(_FakeCompletions(fail=err)))
+
+    def groq_post(p: llm.Provider, body: dict, timeout: float) -> dict:
+        if p.name == "groq":
+            return {"choices": [{"message": {"content": "from groq"}}]}
+        return real_post(p, body, timeout)
+
+    real_post = llm._post
+    monkeypatch.setattr(llm, "_post", groq_post)
+    out = llm.complete([{"role": "user", "content": "hi"}], "extract", settings=_settings(groq_api_key="g", **AZ))
+    assert out.text == "from groq" and out.provider.startswith("groq:")

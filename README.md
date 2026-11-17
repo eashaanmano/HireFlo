@@ -212,6 +212,7 @@ The ones that matter most:
 | `PUBLIC_URL` | Base URL for recruiter and panel links and the venue QR |
 | `WORK_DAY_START`, `WORK_DAY_END`, `WORK_BREAKS`, `SCHEDULE_MAX_DAYS` | Default interview hours for multi-day scheduling |
 | `AZURE_OPENAI_*`, `GROQ_API_KEY` | Optional AI providers |
+| `LANGSMITH_*` | Optional LangSmith tracing of every AI workflow |
 
 ## Security
 

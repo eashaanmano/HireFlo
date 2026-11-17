@@ -20,6 +20,9 @@ os.environ["SOLVER_TIME_LIMIT_SEC"] = "2"
 for _k in ("AZURE_OPENAI_API_KEY", "AZURE_OPENAI_ENDPOINT", "AZURE_OPENAI_DEPLOYMENT", "GROQ_API_KEY", "LLM_API_KEY"):
     os.environ[_k] = ""
 os.environ["LLM_PROVIDER"] = "none"
+# ...and never send traces to LangSmith (the tracing tests use an in-memory client).
+os.environ["LANGSMITH_TRACING"] = "false"
+os.environ["LANGSMITH_API_KEY"] = ""
 # Older tests schedule "from now" at any hour of the day; give them a round-the-clock day. The multi-day tests
 # pass their own working hours.
 os.environ["WORK_DAY_START"] = "00:00"

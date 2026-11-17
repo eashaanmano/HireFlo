@@ -18,7 +18,7 @@ from .core.config import get_settings
 from .core.database import SessionLocal, create_all
 from .core.security import CSRF_HEADER, SESSION_COOKIE
 from .routers import assistant, auth, cell, cell_drives, panel, recruiter, student, ws
-from .services import live, nudges
+from .services import live, nudges, tracing
 from .services.events import manager
 
 log = logging.getLogger("driveops")
@@ -47,6 +47,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     settings = get_settings()
     Path(settings.upload_dir).mkdir(parents=True, exist_ok=True)
     create_all()
+    tracing.configure(settings)  # LangSmith, when LANGSMITH_TRACING is on
     manager.bind_loop(asyncio.get_running_loop())
     task = asyncio.create_task(_monitor(settings.monitor_interval_sec))
     if settings.secret_key.startswith("dev-insecure") and not settings.demo_mode:
@@ -55,6 +56,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     task.cancel()
     with contextlib.suppress(asyncio.CancelledError):
         await task
+    await asyncio.to_thread(tracing.flush)
 
 
 def create_app() -> FastAPI:
