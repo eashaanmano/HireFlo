@@ -8,9 +8,6 @@
 
 **An operations layer for campus placement drives.**
 
-**Live demo: [hireflo-8w3b.onrender.com](https://hireflo-8w3b.onrender.com)** (free instance: after 15 idle minutes
-the first visit takes about a minute to wake it).
-
 Placement cells already run on spreadsheets, e-mail and recruiters' own portals. HireFlo doesn't replace any of that.
 It wraps those tools and runs the drive on top of them:
 
