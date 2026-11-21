@@ -20,6 +20,9 @@ os.environ["SOLVER_TIME_LIMIT_SEC"] = "2"
 for _k in ("AZURE_OPENAI_API_KEY", "AZURE_OPENAI_ENDPOINT", "AZURE_OPENAI_DEPLOYMENT", "GROQ_API_KEY", "LLM_API_KEY"):
     os.environ[_k] = ""
 os.environ["LLM_PROVIDER"] = "none"
+# ...and never send e-mail: the fictional @nitc.ac.in addresses could belong to real people.
+os.environ["SMTP_HOST"] = ""
+os.environ["EMAIL_ONLY_TO"] = ""
 # ...and never send traces to LangSmith (the tracing tests use an in-memory client).
 os.environ["LANGSMITH_TRACING"] = "false"
 os.environ["LANGSMITH_API_KEY"] = ""

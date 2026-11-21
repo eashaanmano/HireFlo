@@ -9,6 +9,7 @@ from datetime import datetime
 from pathlib import Path
 
 from ..models import Application, Slot
+from .resumes import resume_file
 
 ATS_COLUMNS = ("candidate_id", "full_name", "email", "phone", "degree", "branch", "cgpa", "backlogs",
                "graduation_year", "skills", "stage", "status")
@@ -73,7 +74,7 @@ def resume_bundle(apps: Sequence[Application], upload_root: Path) -> bytes:
                 (a.student.resumes[0] if a.student.resumes else None)
             if resume is None:
                 continue
-            path = (upload_root / resume.path).resolve()
+            path = resume_file(resume, upload_root).resolve()
             if not path.is_file() or upload_root.resolve() not in path.parents:
                 continue
             name = f"{i:03d}_{a.student.roll_no}_{a.student.name.replace(' ', '_')}.pdf"

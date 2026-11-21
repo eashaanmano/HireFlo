@@ -51,7 +51,7 @@ from ..services.events import emit
 from ..services.exports import applications_csv, resume_bundle
 from ..services.policy import Placement, active_policy
 from .cell_drives import apply_stage_update
-from .common import application_out, bad_request, get_or_404, offer_out, slot_out
+from .common import application_out, bad_request, get_or_404, offer_out, resume_response, slot_out
 
 router = APIRouter(prefix="/api/r", tags=["recruiter link"],
                    dependencies=[Depends(rate_limit("recruiter", 240, 60))])
@@ -241,8 +241,7 @@ def resume(application_id: int, ctx: RecruiterCtx, db: DbSession) -> FileRespons
     r = db.get(Resume, app.resume_id) if app.resume_id else (app.student.resumes[0] if app.student.resumes else None)
     if r is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "This candidate has no resume on file.")
-    return FileResponse(Path(get_settings().upload_dir) / r.path, media_type="application/pdf",
-                        filename=f"{app.student.roll_no}.pdf")
+    return resume_response(r, f"{app.student.roll_no}.pdf")
 
 
 @router.post("/panels", response_model=PanelOut, status_code=status.HTTP_201_CREATED)

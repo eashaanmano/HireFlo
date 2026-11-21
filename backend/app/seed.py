@@ -18,8 +18,6 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
 
-from reportlab.lib.pagesizes import A4
-from reportlab.pdfgen import canvas
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -51,6 +49,7 @@ from .models import (
 )
 from .services import eligibility, importer, jd_parser, live
 from .services.policy import PolicyConfig, active_policy
+from .services.resumes import draw_demo_resume, seed_resume_path
 from .services.workhours import WorkingHours
 
 SEED_DIR = Path(__file__).resolve().parent.parent / "seed"
@@ -94,7 +93,7 @@ class Featured:
 
 # The team's own demo accounts (fictional academic records).
 FEATURED = [
-    Featured("M250012CS", "Eashaan Manohar", "eashaan_m250012cs@nitc.ac.in", "CSE", "MTECH", 9.12, 0,
+    Featured("M250012CS", "Eashaan Manohar", "eashaan_m260351cs@nitc.ac.in", "CSE", "MTECH", 9.12, 0,
              ["c++", "python", "computer architecture", "verilog", "linux", "system design", "data structures"],
              "Checked in for today's AMD interview; live queue position"),
     Featured("M250047CS", "Midhun Unnikrishna Pillai", "midhun_m250047cs@nitc.ac.in", "CSE", "MTECH", 8.41, 0,
@@ -291,38 +290,6 @@ def _new_batch_csv(rng: random.Random) -> list[dict[str, object]]:
     rows[14]["CPI"] = "8,4"                               # decimal comma
     rows[19]["Department"] = "Mech Engg"                  # unknown branch label
     return rows
-
-
-def _resume_pdf(path: Path, s: Student, track: str) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    c = canvas.Canvas(str(path), pagesize=A4)
-    width, height = A4
-    y = height - 72
-    c.setFont("Helvetica-Bold", 18)
-    c.drawString(64, y, s.name)
-    y -= 20
-    c.setFont("Helvetica", 10)
-    c.drawString(64, y, f"{s.email}  |  {s.phone or ''}  |  {s.roll_no}")
-    y -= 28
-    for title, lines in (
-        ("Education", [f"{s.programme.replace('TECH', '.Tech')} in {s.branch}, NIT Calicut (expected {s.grad_year})",
-                       f"CGPA: {s.cgpa:.2f} / 10"]),
-        ("Skills", [", ".join(s.skills)]),
-        ("Projects", [f"{track} project built with {', '.join(s.skills[:3])}.",
-                      "Course project: designed, tested and documented end to end."]),
-    ):
-        c.setFont("Helvetica-Bold", 12)
-        c.drawString(64, y, title)
-        y -= 16
-        c.setFont("Helvetica", 10)
-        for line in lines:
-            c.drawString(72, y, line[:110])
-            y -= 14
-        y -= 10
-    c.setFont("Helvetica-Oblique", 8)
-    c.drawString(64, 48, "Fictional resume generated for the HireFlo demo.")
-    c.showPage()
-    c.save()
 
 
 # ---------------------------------------------------------------- drives
@@ -592,8 +559,8 @@ def seed(reset: bool, count: int, seed_value: int) -> None:
         students = list(db.scalars(select(Student).order_by(Student.id)))
         for s in students:
             track = "Software" if s.branch == "CSE" else "Core"
-            rel = Path("resumes") / f"{s.id}_seed.pdf"
-            _resume_pdf(upload_root / rel, s, track)
+            rel = seed_resume_path(s.id)
+            draw_demo_resume(upload_root / rel, s, track)
             db.add(Resume(student_id=s.id, track=track, filename=f"{s.roll_no}_resume.pdf", path=str(rel)))
         db.flush()
         for s in students:

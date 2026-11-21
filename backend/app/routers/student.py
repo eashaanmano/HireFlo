@@ -46,7 +46,7 @@ from ..services import analytics, company_profile, eligibility, insights, live, 
 from ..services.events import emit
 from ..services.exports import slots_to_ics
 from ..services.policy import active_policy, placement_for
-from .common import application_out, bad_request, drive_out, get_or_404, offer_out, slot_out
+from .common import application_out, bad_request, drive_out, get_or_404, offer_out, resume_response, slot_out
 
 router = APIRouter(prefix="/api/me", tags=["student"])
 
@@ -124,7 +124,7 @@ def download_resume(resume_id: int, ctx: StudentCtx, db: DbSession) -> FileRespo
     r = get_or_404(db, Resume, resume_id, "Resume")
     if r.student_id != ctx.student.id:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Resume not found.")
-    return FileResponse(Path(get_settings().upload_dir) / r.path, media_type="application/pdf", filename=r.filename)
+    return resume_response(r, r.filename)
 
 
 @router.delete("/resumes/{resume_id}", status_code=status.HTTP_204_NO_CONTENT)

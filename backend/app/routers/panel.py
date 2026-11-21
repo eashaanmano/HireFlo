@@ -1,21 +1,19 @@
 """Interview panel view behind a panel-scoped link. One tap on 'Done' moves the whole drive forward."""
 from __future__ import annotations
 
-from pathlib import Path
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import FileResponse
 from sqlalchemy import select
 
-from ..core.config import get_settings
 from ..core.deps import DbSession, PanelCtx
 from ..core.ratelimit import rate_limit
 from ..core.timeutil import utcnow
 from ..models import Resume, Slot, SlotStatus
 from ..schemas import SlotOut, SlotResult
 from ..services import live
-from .common import bad_request, get_or_404, slot_out
+from .common import bad_request, get_or_404, resume_response, slot_out
 
 router = APIRouter(prefix="/api/p", tags=["panel link"], dependencies=[Depends(rate_limit("panel", 240, 60))])
 
@@ -95,5 +93,4 @@ def resume(slot_id: int, ctx: PanelCtx, db: DbSession) -> FileResponse:
     r = r or (app.student.resumes[0] if app.student.resumes else None)
     if r is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "This candidate has no resume on file.")
-    return FileResponse(Path(get_settings().upload_dir) / r.path, media_type="application/pdf",
-                        filename=f"{app.student.roll_no}.pdf")
+    return resume_response(r, f"{app.student.roll_no}.pdf")

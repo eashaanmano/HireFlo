@@ -4,15 +4,17 @@ from __future__ import annotations
 from typing import TypeVar
 
 from fastapi import HTTPException, status
+from fastapi.responses import FileResponse
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from ..core.database import Base
-from ..models import Application, Drive, EligibilityDecision, Slot
+from ..models import Application, Drive, EligibilityDecision, Resume, Slot
 from ..schemas import ApplicationOut, DriveOut, OfferOut, SlotOut
 from ..services.exports import stage_label
 from ..services.live import SlotProjection
 from ..services.policy import PolicyConfig
+from ..services.resumes import resume_file
 
 T = TypeVar("T", bound=Base)
 
@@ -22,6 +24,14 @@ def get_or_404(db: Session, model: type[T], obj_id: int, what: str | None = None
     if obj is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, f"{what or model.__name__} not found.")
     return obj
+
+
+def resume_response(r: Resume, filename: str) -> FileResponse:
+    """Send a resume PDF; a seeded one the host's disk lost is redrawn, an uploaded one that's gone is a 404."""
+    path = resume_file(r)
+    if not path.is_file():
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "The resume file is no longer on the server. Upload it again.")
+    return FileResponse(path, media_type="application/pdf", filename=filename)
 
 
 def bad_request(msg: str) -> HTTPException:

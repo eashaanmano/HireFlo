@@ -46,10 +46,10 @@ def request_otp(body: OtpRequest, db: DbSession) -> OtpRequested:
     db.commit()
     delivered = send_email(email, "Your HireFlo sign-in code",
                            f"Your code is {code}. It expires in {settings.otp_ttl_minutes} minutes.")
+    if not delivered:
+        print(f"[driveops] OTP for {email}: {code}", flush=True)  # noqa: T201 — the server log is the fallback
     if settings.demo_mode:
         return OtpRequested(sent=True, demo_code=code, message="Demo mode: the code is shown below.")
-    if not delivered:
-        print(f"[driveops] OTP for {email}: {code}")  # noqa: T201 — visible in server logs when SMTP is off
     return OtpRequested(sent=True, message=GENERIC)
 
 

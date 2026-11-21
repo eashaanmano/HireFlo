@@ -45,8 +45,11 @@ def _send_email_sync(to: str, subject: str, body: str) -> None:
 
 
 def send_email(to: str, subject: str, body: str) -> bool:
-    """Fire-and-forget e-mail. Returns False when SMTP is not configured (caller may log instead)."""
-    if not get_settings().smtp_host:
+    """Fire-and-forget e-mail. Returns False when it isn't sent: no SMTP, or `to` is outside EMAIL_ONLY_TO."""
+    s = get_settings()
+    if not s.smtp_host:
+        return False
+    if s.email_allowlist and to.strip().lower() not in s.email_allowlist:
         return False
     threading.Thread(target=_send_email_sync, args=(to, subject, body), daemon=True).start()
     return True

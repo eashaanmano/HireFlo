@@ -1,0 +1,37 @@
+# Render Blueprint: HireFlo as one free web service (API + WebSocket + React app in one container, see Dockerfile).
+# Data lives in Neon (free, persistent PostgreSQL) because a free Render disk is wiped on every restart.
+# Step by step: docs/DEPLOY.md.
+#
+# Secrets are not in this file. DATABASE_URL is asked for when the Blueprint is created; the optional AI, tracing
+# and e-mail keys are pasted afterwards under Environment > "Add from .env":
+#   AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_API_KEY, AZURE_OPENAI_DEPLOYMENT, GROQ_API_KEY,
+#   LANGSMITH_TRACING, LANGSMITH_API_KEY, LANGSMITH_AGENT_ID,
+#   SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, SMTP_FROM   (free Render blocks ports 25/465/587: use a relay
+#   on another port, e.g. smtp.resend.com:2587 or smtp-relay.brevo.com:2525)
+services:
+  - type: web
+    name: hireflo
+    runtime: docker
+    plan: free
+    region: singapore
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/health
+    autoDeployTrigger: commit
+    envVars:
+      - key: DATABASE_URL          # Neon > Connect > pooled connection string, pasted as is
+        sync: false
+      - key: SECRET_KEY            # signs sessions, magic links and check-in codes
+        generateValue: true
+      - key: DEMO_MODE             # one-click demo accounts and on-screen OTPs for evaluators
+        value: "true"
+      - key: COOKIE_SECURE
+        value: "true"
+      - key: SEED_ON_START         # seeds the demo season only when the database is empty
+        value: "true"
+      - key: EMAIL_ONLY_TO         # real OTP e-mail only to these inboxes; the demo's addresses are fictional
+        value: eashaan_m260351cs@nitc.ac.in
+      - key: LANGSMITH_AGENT_ENVIRONMENT
+        value: render
+      - key: SOLVER_TIME_LIMIT_SEC # the free instance has a tenth of a CPU; give CP-SAT a little longer
+        value: "8"

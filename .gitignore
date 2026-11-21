@@ -1,7 +1,7 @@
 # Secrets: never commit real keys (the templates are fine)
 .env
 **/.env
-**/.env.local
+**/.env.*
 !**/.env.example
 
 # Local data: SQLite database, uploaded resumes, generated demo links

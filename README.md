@@ -112,7 +112,7 @@ More detail: [docs/architecture.md](docs/architecture.md).
 | AI | Azure OpenAI (v1 API) and Groq, with fall-back; deterministic extractor and policy engine without AI |
 | Frontend | React 18, TypeScript, Vite, TanStack Query, React Router |
 | Quality | pytest, Vitest and Testing Library, Ruff, GitHub Actions CI |
-| Delivery | Docker Compose (PostgreSQL, API, nginx) |
+| Delivery | Docker Compose (PostgreSQL, API, nginx); Render + Neon for the free hosted demo |
 
 ---
 
@@ -153,6 +153,11 @@ Open **http://localhost:5173**. API docs are at http://localhost:8000/docs.
 
 > Demo times are relative to the moment you seed. Re-seed shortly before a demo (`python -m app.seed --reset`) so
 > the AMD drive is live.
+
+### Option 3: Hosted (free, Render + Neon)
+
+The repo deploys as one free Render web service with a Neon database: `render.yaml` and the root `Dockerfile`.
+Setup, e-mail on the free tier and refreshing the demo before presenting: **[docs/DEPLOY.md](docs/DEPLOY.md)**.
 
 ### Demo accounts
 
@@ -210,6 +215,7 @@ The ones that matter most:
 | `SECRET_KEY` | **Set a long random value in production** (signs sessions, links and check-in codes) |
 | `DEMO_MODE` | Shows OTPs on screen and demo accounts. **Turn off in production** |
 | `PUBLIC_URL` | Base URL for recruiter and panel links and the venue QR |
+| `SMTP_*`, `EMAIL_ONLY_TO` | OTP and notification e-mail; `EMAIL_ONLY_TO` limits real e-mail to the listed inboxes |
 | `WORK_DAY_START`, `WORK_DAY_END`, `WORK_BREAKS`, `SCHEDULE_MAX_DAYS` | Default interview hours for multi-day scheduling |
 | `AZURE_OPENAI_*`, `GROQ_API_KEY` | Optional AI providers |
 | `LANGSMITH_*` | Optional LangSmith tracing of every AI workflow |

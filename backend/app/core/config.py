@@ -4,7 +4,7 @@ from __future__ import annotations
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -70,14 +70,28 @@ class Settings(BaseSettings):
     smtp_user: str = ""
     smtp_password: str = ""
     smtp_from: str = "HireFlo <no-reply@driveops.local>"
+    # Comma separated. When set, e-mail goes only to these addresses and every other one is skipped (its OTP is
+    # printed to the server log instead). The demo's fictional @nitc.ac.in addresses look like real ones, so a
+    # demo with SMTP on should list just the presenters' own inboxes here.
+    email_only_to: str = ""
     telegram_bot_token: str = ""
 
     upload_dir: str = "./data/uploads"
     static_dir: str = ""  # optional: path to a built frontend to serve from the API
 
+    @field_validator("database_url")
+    @classmethod
+    def _blank_database_means_default(cls, v: str) -> str:
+        # Hosting dashboards can leave a variable set but empty; treat that as "not set" instead of crashing.
+        return v.strip() or "sqlite:///./data/driveops.db"
+
     @property
     def cors_origin_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
+
+    @property
+    def email_allowlist(self) -> set[str]:
+        return {e.strip().lower() for e in self.email_only_to.split(",") if e.strip()}
 
     @property
     def is_sqlite(self) -> bool:
