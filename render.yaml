@@ -31,7 +31,7 @@ services:
         value: "true"
       - key: EMAIL_ONLY_TO         # real OTP e-mail only to these inboxes; the demo's addresses are fictional
         value: eashaan_m260351cs@nitc.ac.in
-      - key: LANGSMITH_AGENT_ENVIRONMENT
-        value: render
+      - key: LANGSMITH_AGENT_ENVIRONMENT   # LangSmith accepts local, development, staging or production
+        value: production
       - key: SOLVER_TIME_LIMIT_SEC # the free instance has a tenth of a CPU; give CP-SAT a little longer
         value: "8"

@@ -87,6 +87,14 @@ def test_configure_sends_to_the_agent_or_a_project() -> None:
     assert tracing.status()["enabled"] is False
 
 
+def test_rejected_tracing_settings_turn_tracing_off_instead_of_crashing() -> None:
+    # LangSmith only accepts local/development/staging/production; a host-specific name once stopped start-up.
+    bad = _settings(langsmith_tracing=True, langsmith_api_key="lsv2_test", langsmith_agent_id="hireflo",
+                    langsmith_agent_environment="render")
+    assert tracing.configure(bad) is False
+    assert tracing.status()["enabled"] is False
+
+
 def test_status_endpoint_reports_tracing() -> None:
     assert llm.status(_settings())["tracing"]["enabled"] is False
 

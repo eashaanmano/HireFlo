@@ -63,16 +63,22 @@ def configure(settings: Settings | None = None) -> bool:
         _ls.configure(client=None, enabled=False, project_name=None, address=None, metadata=None)
         _state.update(enabled=False, destination=None, client=None)
         return False
-    client = _ls.Client(api_key=s.langsmith_api_key, api_url=s.langsmith_endpoint or None)
-    meta = {"app": "hireflo"}
-    if s.langsmith_agent_id and s.langsmith_agent_environment:
-        address = _ls.agent_address(s.langsmith_agent_id, s.langsmith_agent_environment)
-        _ls.configure(client=client, enabled=True, address=address, metadata=meta)
-        destination = f"agent {s.langsmith_agent_id} ({s.langsmith_agent_environment})"
-    else:
-        project = s.langsmith_project or "hireflo"
-        _ls.configure(client=client, enabled=True, project_name=project, metadata=meta)
-        destination = f"project {project}"
+    try:
+        client = _ls.Client(api_key=s.langsmith_api_key, api_url=s.langsmith_endpoint or None)
+        meta = {"app": "hireflo"}
+        if s.langsmith_agent_id and s.langsmith_agent_environment:
+            address = _ls.agent_address(s.langsmith_agent_id, s.langsmith_agent_environment)
+            _ls.configure(client=client, enabled=True, address=address, metadata=meta)
+            destination = f"agent {s.langsmith_agent_id} ({s.langsmith_agent_environment})"
+        else:
+            project = s.langsmith_project or "hireflo"
+            _ls.configure(client=client, enabled=True, project_name=project, metadata=meta)
+            destination = f"project {project}"
+    except Exception as exc:  # noqa: BLE001 - a bad tracing setting must never stop the app from starting
+        log.warning("LangSmith tracing is off, its settings were rejected: %s", str(exc)[:200])
+        _ls.configure(client=None, enabled=False, project_name=None, address=None, metadata=None)
+        _state.update(enabled=False, destination=None, client=None)
+        return False
     _state.update(enabled=True, destination=destination, client=client)
     log.info("LangSmith tracing on, sending to %s", destination)
     return True
