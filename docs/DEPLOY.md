@@ -15,6 +15,8 @@ and `/ws` behave exactly as they do behind nginx in docker-compose.
   loading page). **Open the link a couple of minutes before you present.**
 * Uploaded resumes live on the container's disk and vanish on a restart. The seeded resumes are redrawn
   automatically when that happens; a resume someone uploaded has to be uploaded again.
+* The instance gets a tenth of a CPU. Everything works, but the **Simulator**'s many short CP-SAT solves are
+  starved, so its re-planning numbers come out worse than on a laptop. Show the Simulator from the local copy.
 * The demo season is built around the moment it is seeded. Refresh it before a demo (step 4) so the AMD drive is
   live *right now*.
 
@@ -34,7 +36,8 @@ and `/ws` behave exactly as they do behind nginx in docker-compose.
 3. Render reads `render.yaml` and asks for `DATABASE_URL`: paste the Neon string. Everything else is preset
    (`DEMO_MODE=true`, `COOKIE_SECURE=true`, a generated `SECRET_KEY`, the e-mail allowlist).
 4. **Apply.** The first build takes 5 to 10 minutes. On first start the empty Neon database is seeded with the demo
-   season. The site is at `https://hireflo.onrender.com` (or `hireflo-xxxx.onrender.com` if the name is taken).
+   season. The site is at `https://hireflo-<suffix>.onrender.com` (ours: https://hireflo-8w3b.onrender.com;
+   `hireflo.onrender.com` belongs to someone else).
    `/api/health` should say `"database": "neon"`.
 
 `PUBLIC_URL` (used in recruiter and panel links and the venue QR) follows Render's own address automatically.
