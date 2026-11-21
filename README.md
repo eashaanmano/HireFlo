@@ -258,9 +258,9 @@ docs/           architecture, Neon/Azure/Groq setup, SRS
 
 | Member | Role | Owns |
 | --- | --- | --- |
-| Eashaan Manohar | Tech lead | Architecture and data model, core API, auth and security, event bus, CP-SAT scheduler and re-planning, simulator, deployment and CI |
-| Midhun Unnikrishna Pillai | AI and rules | JD extraction, policy engine, policy Q&A |
-| Harsh Kumar Kashyap | Frontend | UI and PWA for all actors, notifications, QR check-in |
+| Eashaan Manohar | Platform Architect, AI and Lead Full Stack | Architecture and data model, core API, auth and security, event bus, CP-SAT scheduler and re-planning, simulator, deployment and CI |
+| Midhun Unnikrishna Pillai | Security and Backend and APIs | JD extraction, policy engine, policy Q&A |
+| Harsh Kumar Kashyap | Frontend, UI/UX and Data Views/Schemas | UI and PWA for all actors, notifications, QR check-in |
 
 ---
 
