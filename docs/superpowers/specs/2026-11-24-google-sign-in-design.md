@@ -45,8 +45,9 @@ The presenter picked Google directly.
   records an `auth.login` event with `method: google`, and redirects to `next` (relative paths only) or `/`.
   Any failure redirects to `/login?error=<reason>` (`cancelled`, `not_nitc`, `not_registered`, `expired`, `failed`)
   and the login page explains it.
-- **Redirect URI** = `PUBLIC_URL` + `/api/auth/google/callback`; the Google client lists the Render URL,
-  `http://localhost:5173` and `http://localhost:8000` versions.
+- **Redirect URI** = the address the browser is on + `/api/auth/google/callback` (changed from `PUBLIC_URL` while
+  building: the local `PUBLIC_URL` is a LAN IP, which Google refuses, and the flow cookie only comes back to the
+  host that set it). The Google client lists the Render URL, `http://localhost:5173` and `http://localhost:8000`.
 - **Domain rule on the server:** `/otp/request` and `/otp/verify` refuse other domains with a clear 400
   ("Use your @nitc.ac.in address"). This reveals nothing about who is registered.
 - **Login page:** "Continue with Google" above the e-mail form with an "or" divider. As soon as the text after `@`

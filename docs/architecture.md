@@ -5,8 +5,9 @@
 ```mermaid
 flowchart TB
   R[Recruiter<br/>magic link] <--> API
-  C[Placement cell<br/>OTP session] <--> API
-  S[Student PWA<br/>OTP session] <--> API
+  C[Placement cell<br/>OTP or Google session] <--> API
+  S[Student PWA<br/>OTP or Google session] <--> API
+  G[Google<br/>OpenID Connect] -. sign-in .-> API
   P[Panel<br/>sub-link] <--> API
   API[FastAPI routers<br/>auth · RBAC · CSRF · validation] --> SVC
   subgraph SVC[Services]

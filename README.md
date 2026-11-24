@@ -35,8 +35,8 @@ HireFlo answers those questions live, for everyone, from one event stream.
 
 | Who | Signs in with | What they get |
 | --- | --- | --- |
-| **Student** | E-mail OTP (profile pre-imported, no signup) | "What needs you" dashboard, explained eligibility, live interview queue and ETA, offer what-ifs ("which drives would I lose?"), AI assistant |
-| **Placement cell** | E-mail OTP (coordinator or admin) | Exceptions inbox, JD to rules with human approval, versioned policy engine, conflict-free scheduling, drive control room with one-click re-plans, analytics, audit log, simulator |
+| **Student** | NITC Google account (OAuth) or e-mail OTP (profile pre-imported, no signup) | "What needs you" dashboard, explained eligibility, live interview queue and ETA, offer what-ifs ("which drives would I lose?"), AI assistant |
+| **Placement cell** | NITC Google account or e-mail OTP (coordinator or admin) | Exceptions inbox, JD to rules with human approval, versioned policy engine, conflict-free scheduling, drive control room with one-click re-plans, analytics, audit log, simulator |
 | **Recruiter** | Expiring magic link (no account) | Pool what-if before committing, shortlists and results as CSV, resume bundle, live panel progress, hiring funnel |
 | **Interview panel** | Per-panel link | One screen: next candidate, resume, Start, Done |
 
@@ -85,7 +85,7 @@ flowchart TB
   Clients["React + TypeScript PWA<br/>Student · Placement cell · Recruiter link · Panel link"]
   subgraph API["FastAPI backend"]
     direction LR
-    AUTH["OTP auth · RBAC · CSRF"]
+    AUTH["Google sign-in · OTP · RBAC · CSRF"]
     POL["Policy and<br/>eligibility engine"]
     SCH["CP-SAT scheduler<br/>and re-planner"]
     LIVE["Drive-day monitor"]
@@ -160,7 +160,8 @@ Open **http://localhost:5173**. API docs are at http://localhost:8000/docs.
 ### Option 3: Hosted (free, Render + Neon)
 
 The repo deploys as one free Render web service with a Neon database: `render.yaml` and the root `Dockerfile`.
-Setup, e-mail on the free tier and refreshing the demo before presenting: **[docs/DEPLOY.md](docs/DEPLOY.md)**.
+Setup, e-mail on the free tier, Google sign-in and refreshing the demo before presenting:
+**[docs/DEPLOY.md](docs/DEPLOY.md)**.
 
 ### Demo accounts
 
@@ -219,6 +220,8 @@ The ones that matter most:
 | `DEMO_MODE` | Shows OTPs on screen and demo accounts. **Turn off in production** |
 | `PUBLIC_URL` | Base URL for recruiter and panel links and the venue QR |
 | `SMTP_*`, `EMAIL_ONLY_TO` | OTP and notification e-mail; `EMAIL_ONLY_TO` limits real e-mail to the listed inboxes |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Optional "Continue with Google" (see [docs/DEPLOY.md](docs/DEPLOY.md#4-optional-google-sign-in-oauth)) |
+| `INSTITUTE_DOMAIN` | The only e-mail domain that can sign in (default `nitc.ac.in`) |
 | `WORK_DAY_START`, `WORK_DAY_END`, `WORK_BREAKS`, `SCHEDULE_MAX_DAYS` | Default interview hours for multi-day scheduling |
 | `AZURE_OPENAI_*`, `GROQ_API_KEY` | Optional AI providers |
 | `LANGSMITH_*` | Optional LangSmith tracing of every AI workflow |
@@ -226,6 +229,11 @@ The ones that matter most:
 ## Security
 
 - Passwordless OTP sign-in: codes are HMAC-hashed, expire in 10 minutes and are rate-limited per IP and e-mail.
+- Google sign-in (OAuth 2.0 / OpenID Connect, authorization code with PKCE, state and nonce): the ID token's
+  signature, issuer, audience, expiry and nonce are checked against Google's keys, and it must carry
+  `hd=nitc.ac.in`. Only people already registered get in; nothing from Google is stored.
+- Only `@nitc.ac.in` addresses can sign in: the login page flags any other address as it is typed and the server
+  refuses it.
 - Signed session cookies (`HttpOnly`, `SameSite=Lax`), CSRF header on every cookie-authenticated write, and
   role-based plus row-level access checks on the server.
 - Recruiters see aggregates for the pool and personal details only for students who applied.

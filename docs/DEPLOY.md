@@ -76,7 +76,40 @@ fictional but look like real `@nitc.ac.in` ones, so nobody else is ever e-mailed
 e-mailed, the OTP is printed in the service's **Logs** (`[driveops] OTP for ...`), just like the terminal locally.
 In demo mode it is also shown on screen.
 
-## 4. Refresh the demo data before presenting
+## 4. Optional: Google sign-in (OAuth)
+
+`nitc.ac.in` mail runs on Google Workspace, so "Continue with Google" is the institute's own single sign-on
+(OAuth 2.0 / OpenID Connect). HireFlo accepts a Google account only if Google's signed ID token says it belongs to
+`nitc.ac.in` (`hd` claim) and the person is already in HireFlo; there is no sign-up through Google.
+
+1. At **console.cloud.google.com**, create a project (a personal Gmail can own it; NITC accounts may not be
+   allowed to create projects).
+2. **Google Auth Platform → Get started**: app name HireFlo, your support e-mail, audience **External**. Then
+   **Audience → Test users**: add the NITC addresses that will sign in while the app is in testing.
+3. **Clients → Create client → Web application**, with these **Authorized redirect URIs**:
+   ```
+   https://<your-service>.onrender.com/api/auth/google/callback
+   http://localhost:5173/api/auth/google/callback
+   http://localhost:8000/api/auth/google/callback
+   ```
+   **Create**, then download the JSON at once: Google shows the client secret only this one time. Keep it out of
+   the repository.
+4. Render → **Environment → Add from .env**, then **Save, rebuild and deploy**:
+   ```
+   GOOGLE_CLIENT_ID=<id>.apps.googleusercontent.com
+   GOOGLE_CLIENT_SECRET=GOCSPX-...
+   ```
+   For a local run, add the same two lines to `backend/.env`.
+
+The button appears on the login page once both keys are set. Google sends the browser back to the address it
+started from, so open the local app at **http://localhost:5173** (Google refuses IP addresses such as
+`http://192.168.x.x:5173` as redirect URIs; the e-mail code works on any address). If NITC's Workspace admin blocks
+unconfigured apps, Google shows `admin_policy_enforced`; the e-mail code still works.
+
+Every sign-in, by code or by Google, is limited to `INSTITUTE_DOMAIN` (default `nitc.ac.in`): the login page flags
+any other address as it is typed, and the server refuses it.
+
+## 5. Refresh the demo data before presenting
 
 The **Refresh demo data** GitHub Action re-seeds Neon from GitHub's runner (about a minute; the free Render
 instance is too slow to seed quickly). It runs every morning at 08:00 IST and on demand.
@@ -93,7 +126,7 @@ gh workflow run refresh-demo.yml
 
 A refresh replaces all data, including anything changed during an earlier demo.
 
-## 5. Changing the hosted app
+## 6. Changing the hosted app
 
 Every push to the deployed branch rebuilds and redeploys automatically (5 to 10 minutes on the free plan). For a
 change requested on the spot during an evaluation, show it on the local copy first; the hosted site follows after the
