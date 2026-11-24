@@ -28,11 +28,34 @@ router = APIRouter(prefix="/api/auth", tags=["auth"])
 GENERIC = "If that address is registered, a 6-digit code is on its way."
 
 
+def _require_institute_email(email: str) -> None:
+    settings = get_settings()
+    if not settings.allows_email(email):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, f"Use your @{settings.domain} address.")
+
+
+def set_session_cookie(response: Response, user: User) -> None:
+    """Signs the user in on this browser (shared by the OTP and Google routes)."""
+    settings = get_settings()
+    response.set_cookie(
+        SESSION_COOKIE, create_session_token(user.id, user.role.value), httponly=True,
+        secure=settings.cookie_secure, samesite="lax", max_age=settings.session_hours * 3600, path="/",
+    )
+
+
+@router.get("/options")
+def options() -> dict[str, object]:
+    """What the login page offers: Google sign-in when configured, and the one domain that may sign in."""
+    settings = get_settings()
+    return {"google": settings.google_enabled, "domain": settings.domain}
+
+
 @router.post("/otp/request", response_model=OtpRequested,
              dependencies=[Depends(rate_limit("otp-request", 20, 600))])
 def request_otp(body: OtpRequest, db: DbSession) -> OtpRequested:
     settings = get_settings()
     email = body.email.lower()
+    _require_institute_email(email)
     if not limiter.hit(f"otp-email:{email}", 5, 600):
         raise HTTPException(status.HTTP_429_TOO_MANY_REQUESTS, "Too many codes requested. Wait a few minutes.")
     user = db.scalar(select(User).where(User.email == email))
@@ -57,6 +80,7 @@ def request_otp(body: OtpRequest, db: DbSession) -> OtpRequested:
 def verify(body: OtpVerify, response: Response, db: DbSession) -> User:
     settings = get_settings()
     email = body.email.lower()
+    _require_institute_email(email)
     otp = db.scalar(select(OtpCode).where(OtpCode.email == email, OtpCode.used.is_(False))
                     .order_by(OtpCode.id.desc()))
     invalid = HTTPException(status.HTTP_400_BAD_REQUEST, "That code is wrong or has expired. Request a new one.")
@@ -70,12 +94,9 @@ def verify(body: OtpVerify, response: Response, db: DbSession) -> User:
     user = db.scalar(select(User).where(User.email == email))
     if user is None or not user.active:
         raise invalid
-    emit(db, "auth.login", user.email, entity="user", entity_id=user.id)
+    emit(db, "auth.login", user.email, entity="user", entity_id=user.id, payload={"method": "otp"})
     db.commit()
-    response.set_cookie(
-        SESSION_COOKIE, create_session_token(user.id, user.role.value), httponly=True,
-        secure=settings.cookie_secure, samesite="lax", max_age=settings.session_hours * 3600, path="/",
-    )
+    set_session_cookie(response, user)
     return user
 
 
