@@ -119,11 +119,22 @@ def test_start_redirects_to_google(google: FakeGoogle, client: TestClient) -> No
     url = urlsplit(r.headers["location"])
     assert f"{url.scheme}://{url.netloc}{url.path}" == google_oidc.AUTH_URL
     assert q["client_id"] == CLIENT_ID and q["response_type"] == "code"
-    assert q["redirect_uri"] == get_settings().public_url.rstrip("/") + CALLBACK
+    assert q["redirect_uri"] == "http://testserver" + CALLBACK
     assert q["scope"] == "openid email profile" and q["hd"] == "nitc.ac.in" and q["prompt"] == "select_account"
     assert q["code_challenge_method"] == "S256" and q["state"] and q["nonce"]
     cookie = r.headers["set-cookie"]
     assert cookie.startswith(f"{GOOGLE_FLOW_COOKIE}=") and "HttpOnly" in cookie and "Path=/api/auth/google" in cookie
+
+
+def test_redirect_uri_follows_the_address_in_the_browser(google: FakeGoogle, client: TestClient,
+                                                         monkeypatch: pytest.MonkeyPatch) -> None:
+    # PUBLIC_URL may be a LAN address for phones (Google refuses raw IPs), and the flow cookie belongs to the host
+    # the browser is on, so Google must send the user back to that same host.
+    monkeypatch.setenv("PUBLIC_URL", "http://172.21.42.8:5173")
+    get_settings.cache_clear()
+    r = client.get("/api/auth/google/start", headers={"host": "localhost:5173"}, follow_redirects=False)
+    q = dict(parse_qsl(urlsplit(r.headers["location"]).query))
+    assert q["redirect_uri"] == "http://localhost:5173" + CALLBACK
 
 
 def test_callback_signs_in_a_registered_nitc_user(google: FakeGoogle, client: TestClient, db: Session) -> None:

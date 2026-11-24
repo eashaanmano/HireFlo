@@ -44,16 +44,18 @@ def _google_settings() -> Settings:
     return settings
 
 
-def _callback_url(settings: Settings) -> str:
-    return settings.public_url.rstrip("/") + FLOW_PATH + "/callback"
+def _callback_url(request: Request) -> str:
+    # The address the browser is on (behind Render's proxy, uvicorn's --proxy-headers make this https), not
+    # PUBLIC_URL: that may be a LAN IP for phones, which Google refuses, and the flow cookie belongs to this host.
+    return str(request.base_url).rstrip("/") + FLOW_PATH + "/callback"
 
 
 @router.get("/start", dependencies=[Depends(rate_limit("google-start", 30, 600))])
-def start(next: str | None = None) -> RedirectResponse:  # noqa: A002 — the login page's ?next=
+def start(request: Request, next: str | None = None) -> RedirectResponse:  # noqa: A002 — the login page's ?next=
     settings = _google_settings()
     state, nonce = secrets.token_urlsafe(24), secrets.token_urlsafe(24)
     verifier, challenge = google_oidc.new_pkce()
-    url = google_oidc.authorization_url(settings, redirect_uri=_callback_url(settings), state=state, nonce=nonce,
+    url = google_oidc.authorization_url(settings, redirect_uri=_callback_url(request), state=state, nonce=nonce,
                                         code_challenge=challenge)
     response = RedirectResponse(url, status_code=status.HTTP_302_FOUND)
     response.set_cookie(GOOGLE_FLOW_COOKIE, create_google_flow_token(state, nonce, verifier, safe_next(next)),
@@ -62,8 +64,9 @@ def start(next: str | None = None) -> RedirectResponse:  # noqa: A002 — the lo
     return response
 
 
-def _finish(db: DbSession, settings: Settings, flow_cookie: str | None, code: str | None, state: str | None,
+def _finish(db: DbSession, settings: Settings, request: Request, code: str | None, state: str | None,
             error: str | None) -> tuple[User, str]:
+    flow_cookie = request.cookies.get(GOOGLE_FLOW_COOKIE)
     if error:
         raise GoogleSignInError("cancelled" if error == "access_denied" else "failed", error)
     if not flow_cookie:
@@ -77,7 +80,7 @@ def _finish(db: DbSession, settings: Settings, flow_cookie: str | None, code: st
     if not code:
         raise GoogleSignInError("failed", "no authorization code")
     token = google_oidc.exchange_code(settings, code=code, code_verifier=flow["verifier"],
-                                      redirect_uri=_callback_url(settings))
+                                      redirect_uri=_callback_url(request))
     identity = google_oidc.verify_id_token(settings, token, nonce=flow["nonce"])
     user = db.scalar(select(User).where(User.email == identity.email))
     if user is None or not user.active:
@@ -92,7 +95,7 @@ def callback(request: Request, db: DbSession, code: str | None = None, state: st
              error: str | None = None) -> RedirectResponse:
     settings = _google_settings()
     try:
-        user, next_path = _finish(db, settings, request.cookies.get(GOOGLE_FLOW_COOKIE), code, state, error)
+        user, next_path = _finish(db, settings, request, code, state, error)
     except GoogleSignInError as exc:
         log.info("Google sign-in refused (%s): %s", exc.reason, exc.detail)
         response = RedirectResponse(f"/login?error={exc.reason}", status_code=status.HTTP_303_SEE_OTHER)
