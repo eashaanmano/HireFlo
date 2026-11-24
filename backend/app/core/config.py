@@ -22,6 +22,13 @@ class Settings(BaseSettings):
     recruiter_link_days: int = 21
     otp_ttl_minutes: int = 10
     otp_max_attempts: int = 5
+    # Only addresses at this domain can sign in (OTP or Google). Blank allows any domain.
+    institute_domain: str = "nitc.ac.in"
+    # "Continue with Google" (OpenID Connect). On when both are set; the client comes from Google Cloud >
+    # Google Auth Platform > Clients (Web application). Its redirect URIs are <each address the site is opened on>
+    # + /api/auth/google/callback, e.g. http://localhost:5173/... and https://<service>.onrender.com/...
+    google_client_id: str = ""
+    google_client_secret: str = ""
 
     # Drive-day operations
     delay_threshold_min: int = 10        # projected lateness that triggers a re-plan proposal
@@ -88,6 +95,17 @@ class Settings(BaseSettings):
     @property
     def cors_origin_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
+
+    @property
+    def google_enabled(self) -> bool:
+        return bool(self.google_client_id.strip() and self.google_client_secret.strip())
+
+    @property
+    def domain(self) -> str:
+        return self.institute_domain.strip().lower().lstrip("@")
+
+    def allows_email(self, email: str) -> bool:
+        return not self.domain or email.strip().lower().endswith("@" + self.domain)
 
     @property
     def email_allowlist(self) -> set[str]:

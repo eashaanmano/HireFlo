@@ -17,7 +17,10 @@ ALGORITHM = "HS256"
 SESSION_COOKIE = "driveops_session"
 CSRF_HEADER = "X-DriveOps-CSRF"
 
-TokenKind = Literal["session", "recruiter", "panel", "checkin"]
+GOOGLE_FLOW_COOKIE = "driveops_google"
+GOOGLE_FLOW_TTL = timedelta(minutes=10)
+
+TokenKind = Literal["session", "recruiter", "panel", "checkin", "google_flow"]
 
 
 class TokenError(Exception):
@@ -56,6 +59,21 @@ def create_session_token(user_id: int, role: str) -> str:
 
 def decode_session_token(token: str) -> int:
     return int(_decode(token, "session")["sub"])
+
+
+# ---------------------------------------------------------------- Google sign-in
+def create_google_flow_token(state: str, nonce: str, verifier: str, next_path: str) -> str:
+    """What the callback needs to finish a Google sign-in, kept in a signed, short-lived, HttpOnly cookie."""
+    return _encode({"kind": "google_flow", "state": state, "nonce": nonce, "verifier": verifier, "next": next_path},
+                   GOOGLE_FLOW_TTL)
+
+
+def decode_google_flow_token(token: str) -> dict[str, str]:
+    data = _decode(token, "google_flow")
+    try:
+        return {k: str(data[k]) for k in ("state", "nonce", "verifier", "next")}
+    except KeyError as exc:
+        raise TokenError("incomplete sign-in state") from exc
 
 
 # ---------------------------------------------------------------- magic links

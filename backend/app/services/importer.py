@@ -15,6 +15,7 @@ from email_validator import EmailNotValidError, validate_email
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from ..core.config import get_settings
 from ..models import Role, Student, User
 
 BRANCHES = {"CSE", "ECE", "EEE", "ME", "CE", "CHE", "PE"}
@@ -96,6 +97,10 @@ def parse_row(raw: dict[str, str], mapping: dict[str, str]) -> tuple[dict[str, A
             data["email"] = validate_email(email, check_deliverability=False).normalized.lower()
         except EmailNotValidError:
             problems.append(f"invalid email '{email}'")
+        else:
+            settings = get_settings()
+            if not settings.allows_email(data["email"]):  # such an account could never sign in
+                problems.append(f"not an @{settings.domain} address '{email}'")
     data["phone"] = re.sub(r"[^\d+]", "", get("phone")) or None
     branch = _normalise_branch(get("branch")) if get("branch") else ""
     if branch and branch not in BRANCHES:

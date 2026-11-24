@@ -22,6 +22,10 @@ for _k in ("AZURE_OPENAI_API_KEY", "AZURE_OPENAI_ENDPOINT", "AZURE_OPENAI_DEPLOY
 os.environ["LLM_PROVIDER"] = "none"
 # ...and never send e-mail: the fictional @nitc.ac.in addresses could belong to real people.
 os.environ["SMTP_HOST"] = ""
+# ...and never reach Google: the local .env may hold a real client.
+os.environ["GOOGLE_CLIENT_ID"] = ""
+os.environ["GOOGLE_CLIENT_SECRET"] = ""
+os.environ["INSTITUTE_DOMAIN"] = "nitc.ac.in"
 os.environ["EMAIL_ONLY_TO"] = ""
 # ...and never send traces to LangSmith (the tracing tests use an in-memory client).
 os.environ["LANGSMITH_TRACING"] = "false"

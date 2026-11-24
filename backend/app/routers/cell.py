@@ -43,7 +43,7 @@ from ..services.exports import rows_csv
 from ..services.notifications import notify
 from ..services.policy import active_policy, placements_for_all, save_new_version
 from ..services.simulator import SimConfig, run_simulation
-from .common import bad_request, conflict, get_or_404
+from .common import bad_request, conflict, get_or_404, require_institute_email
 
 router = APIRouter(prefix="/api/cell", tags=["placement cell"])
 
@@ -172,6 +172,7 @@ def list_students(user: CellUser, db: DbSession, q: str | None = Query(default=N
 
 @router.post("/students", response_model=StudentOut, status_code=status.HTTP_201_CREATED)
 def create_student(body: StudentCreate, user: CellUser, db: DbSession) -> Any:
+    require_institute_email(body.email)
     if db.scalar(select(Student).where(or_(Student.roll_no == body.roll_no.upper(),
                                            Student.email == body.email.lower()))):
         raise conflict("A student with this roll number or e-mail already exists.")
@@ -398,6 +399,7 @@ def list_users(user: AdminUser, db: DbSession) -> Any:
 
 @router.post("/users", response_model=UserOut, status_code=status.HTTP_201_CREATED)
 def invite_user(body: UserIn, user: AdminUser, db: DbSession) -> Any:
+    require_institute_email(body.email)
     if db.scalar(select(User).where(User.email == body.email.lower())):
         raise conflict("This e-mail already has an account.")
     u = User(email=body.email.lower(), name=body.name, role=Role(body.role))

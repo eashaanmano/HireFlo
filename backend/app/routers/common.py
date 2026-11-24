@@ -8,6 +8,7 @@ from fastapi.responses import FileResponse
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from ..core.config import get_settings
 from ..core.database import Base
 from ..models import Application, Drive, EligibilityDecision, Resume, Slot
 from ..schemas import ApplicationOut, DriveOut, OfferOut, SlotOut
@@ -24,6 +25,13 @@ def get_or_404(db: Session, model: type[T], obj_id: int, what: str | None = None
     if obj is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, f"{what or model.__name__} not found.")
     return obj
+
+
+def require_institute_email(email: str) -> None:
+    """Accounts are only for institute addresses: anything else could never sign in (OTP or Google)."""
+    settings = get_settings()
+    if not settings.allows_email(email):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, f"Use an @{settings.domain} address.")
 
 
 def resume_response(r: Resume, filename: str) -> FileResponse:
