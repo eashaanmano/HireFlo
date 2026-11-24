@@ -6,11 +6,41 @@ import { api, ApiError } from "../api/client";
 import type { DemoAccount, Me } from "../api/types";
 import { Button } from "../components/ui";
 import { homeFor, useAuth } from "../lib/auth";
+import { domainProblem } from "../lib/email";
 
 interface OtpRequested {
   sent: boolean;
   demo_code: string | null;
   message: string;
+}
+
+interface AuthOptions {
+  google: boolean;
+  domain: string;
+}
+
+/** What /api/auth/google/callback's ?error= means, in words. */
+function googleMessage(code: string | null, domain: string): string | null {
+  const inst = domain ? `@${domain}` : "institute";
+  switch (code) {
+    case "cancelled": return "Google sign-in was cancelled. Try again, or use an e-mail code.";
+    case "not_nitc": return `That Google account isn't an ${inst} account. Choose your ${inst} account.`;
+    case "not_registered": return "That account isn't registered in HireFlo. Ask the placement cell to add you.";
+    case "expired": return "That sign-in took too long or was already used. Try again.";
+    case "failed": return "Google sign-in didn't work. Try again, or use an e-mail code.";
+    default: return null;
+  }
+}
+
+function GoogleMark() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true">
+      <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
+      <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
+      <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" />
+      <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
+    </svg>
+  );
 }
 
 // Illustrative board for the landing page (mirrors the seeded demo drives).
@@ -62,6 +92,16 @@ export function Login() {
     queryFn: () => api.get<DemoAccount[]>("/api/auth/demo-accounts"),
     retry: false,
   });
+  // If this can't load, the page still works: no Google button and no early flag (the server checks the domain).
+  const options = useQuery({
+    queryKey: ["auth-options"],
+    queryFn: () => api.get<AuthOptions>("/api/auth/options"),
+    retry: false,
+    staleTime: 5 * 60_000,
+  });
+  const domain = options.data?.domain ?? "";
+  const [googleError, setGoogleError] = useState(() => params.get("error"));
+  const [tried, setTried] = useState(false);
 
   useEffect(() => {
     if (step === "code") codeRef.current?.focus();
@@ -77,6 +117,7 @@ export function Login() {
   const requestCode = async (target: string) => {
     setBusy("email");
     setError(null);
+    setGoogleError(null);
     try {
       const r = await api.post<OtpRequested>("/api/auth/otp/request", { email: target });
       setEmail(target);
@@ -107,6 +148,7 @@ export function Login() {
   const quickSignIn = async (account: DemoAccount) => {
     setBusy(account.email);
     setError(null);
+    setGoogleError(null);
     try {
       const r = await api.post<OtpRequested>("/api/auth/otp/request", { email: account.email });
       if (!r.demo_code) {
@@ -125,6 +167,11 @@ export function Login() {
 
   const students = demo.data?.filter((a) => a.role === "student") ?? [];
   const cell = demo.data?.filter((a) => a.role !== "student") ?? [];
+  const google = options.data?.google === true;
+  const flag = domainProblem(email, domain, tried);
+  const googleText = googleMessage(googleError, domain);
+  const next = params.get("next");
+  const googleHref = `/api/auth/google/start${next ? `?next=${encodeURIComponent(next)}` : ""}`;
 
   return (
     <div className="landing">
@@ -182,19 +229,41 @@ export function Login() {
           </div>
           <h2 className="signin-title">{step === "email" ? "Sign in" : "Check your code"}</h2>
           <p className="muted" style={{ marginBottom: 18 }}>
-            {step === "email"
-              ? "Use your institute e-mail. We'll send a 6-digit code; there's no password."
-              : `We sent a code to ${email}.`}
+            {step === "code"
+              ? `We sent a code to ${email}.`
+              : google
+                ? "Use your NITC Google account, or get a 6-digit code by e-mail. There's no password."
+                : "Use your institute e-mail. We'll send a 6-digit code; there's no password."}
           </p>
 
+          {step === "email" && googleText && (
+            <div className="callout bad" role="alert" style={{ marginBottom: 14 }}>{googleText}</div>
+          )}
+          {step === "email" && google && (
+            <>
+              <a className="btn big google" href={googleHref}>
+                <GoogleMark /> Continue with Google
+              </a>
+              <div className="or"><span>or get a code by e-mail</span></div>
+            </>
+          )}
+
           {step === "email" ? (
-            <form className="stack" onSubmit={(e) => { e.preventDefault(); void requestCode(email); }}>
+            <form className="stack" onSubmit={(e) => {
+              e.preventDefault();
+              setTried(true);
+              if (!domainProblem(email, domain, true)) void requestCode(email.trim());
+            }}>
               <label className="field">
                 Institute e-mail
-                <input type="email" required autoFocus value={email} onChange={(e) => setEmail(e.target.value)}
-                  placeholder="name_rollno@nitc.ac.in" autoComplete="email" />
+                <input type="email" required autoFocus={!google} value={email}
+                  onChange={(e) => { setEmail(e.target.value); setTried(false); }}
+                  placeholder={`name_rollno@${domain || "nitc.ac.in"}`} autoComplete="email"
+                  aria-invalid={flag ? true : undefined} aria-describedby={flag ? "email-flag" : undefined} />
+                {flag && <span id="email-flag" className="field-flag" aria-live="polite">{flag}</span>}
               </label>
-              <Button variant="primary" size="big" busy={busy === "email"} type="submit">Send code</Button>
+              <Button variant="primary" size="big" busy={busy === "email"} type="submit"
+                disabled={flag !== null}>Send code</Button>
             </form>
           ) : (
             <form className="stack" onSubmit={verify}>

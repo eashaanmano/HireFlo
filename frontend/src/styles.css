@@ -350,6 +350,17 @@ pre.jd { white-space: pre-wrap; font-family: var(--font); background: var(--surf
 .steps .on { color: var(--ink); font-weight: 600; }
 .steps .on b { background: var(--signal); color: var(--signal-ink); border-color: var(--signal); }
 .steps .done b { background: var(--signal-soft); color: var(--signal); border-color: transparent; }
+/* Google's sign-in button colours (neutral theme), per its branding guidelines */
+.btn.google { width: 100%; gap: 12px; background: #ffffff; color: #1f1f1f; border-color: #747775; }
+.btn.google:hover:not(:disabled) { background: #f6f8fc; }
+@media (prefers-color-scheme: dark) {
+  .btn.google { background: #131314; color: #e3e3e3; border-color: #8e918f; }
+  .btn.google:hover:not(:disabled) { background: #1d1e20; }
+}
+.or { display: flex; align-items: center; gap: 12px; margin: 18px 0; color: var(--ink-3); font-size: 13px; }
+.or::before, .or::after { content: ""; flex: 1; border-top: 1px solid var(--line-2); }
+.field-flag { color: var(--red); font-size: 13px; font-weight: 500; }
+input[aria-invalid="true"] { border-color: var(--red); }
 .demo { margin-top: 26px; border-top: 1px solid var(--line); padding-top: 18px; }
 .demo-head { display: flex; align-items: center; gap: 8px; color: var(--signal); margin-bottom: 4px; }
 .demo-head span { color: var(--ink-2); }
