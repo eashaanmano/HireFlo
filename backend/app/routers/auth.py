@@ -1,9 +1,10 @@
 """Passwordless sign-in: e-mail OTP for students and the placement cell. No passwords are ever stored."""
 from __future__ import annotations
 
+import ipaddress
 from datetime import timedelta
 
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from sqlalchemy import select, update
 
 from ..core.config import get_settings
@@ -43,11 +44,23 @@ def set_session_cookie(response: Response, user: User) -> None:
     )
 
 
+def _is_ip_address(host: str | None) -> bool:
+    try:
+        ipaddress.ip_address(host or "")
+    except ValueError:
+        return False
+    return True
+
+
 @router.get("/options")
-def options() -> dict[str, object]:
-    """What the login page offers: Google sign-in when configured, and the one domain that may sign in."""
+def options(request: Request) -> dict[str, object]:
+    """What the login page offers: Google sign-in when configured, and the one domain that may sign in.
+
+    Google only returns to registered host names, never raw IP addresses (a phone on the LAN), so no button there.
+    """
     settings = get_settings()
-    return {"google": settings.google_enabled, "domain": settings.domain}
+    google = settings.google_enabled and not _is_ip_address(request.url.hostname)
+    return {"google": google, "domain": settings.domain}
 
 
 @router.post("/otp/request", response_model=OtpRequested,

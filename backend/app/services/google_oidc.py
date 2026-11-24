@@ -74,12 +74,25 @@ def exchange_code(settings: Settings, *, code: str, code_verifier: str, redirect
         body = _post_token({"code": code, "client_id": settings.google_client_id.strip(),
                             "client_secret": settings.google_client_secret.strip(), "redirect_uri": redirect_uri,
                             "grant_type": "authorization_code", "code_verifier": code_verifier})
+    except httpx.HTTPStatusError as exc:
+        raise GoogleSignInError("failed", f"Google refused the code exchange: {_google_error(exc.response)}") from exc
     except (httpx.HTTPError, ValueError) as exc:
         raise GoogleSignInError("failed", f"code exchange: {exc}") from exc
     token = body.get("id_token")
     if not isinstance(token, str) or not token:
         raise GoogleSignInError("failed", "no ID token in Google's reply")
     return token
+
+
+def _google_error(response: httpx.Response) -> str:
+    """Google's own reason (invalid_client, invalid_grant, redirect_uri_mismatch...), never our request."""
+    try:
+        body = response.json()
+    except ValueError:
+        body = None
+    if not isinstance(body, dict):
+        return f"HTTP {response.status_code}"
+    return f"HTTP {response.status_code} {body.get('error', '')}: {body.get('error_description', '')}"
 
 
 @lru_cache(maxsize=1)

@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import base64
 import hashlib
+import logging
 import time
 from collections.abc import Iterator
 from typing import Any
@@ -20,7 +21,8 @@ from app.core.config import Settings, get_settings
 from app.core.security import GOOGLE_FLOW_COOKIE
 from app.models import Event, User
 from app.services import google_oidc
-from tests.conftest import make_student
+from app.services.importer import import_students
+from tests.conftest import CSRF, login, make_cell_user, make_student
 
 CLIENT_ID = "hireflo-test.apps.googleusercontent.com"
 KEY = rsa.generate_private_key(public_exponent=65537, key_size=2048)       # stands in for Google's signing key
@@ -54,6 +56,31 @@ def test_blank_institute_domain_allows_any() -> None:
     assert Settings(institute_domain="").allows_email("a@b.com")
 
 
+def test_cell_cannot_add_accounts_that_could_never_sign_in(client: TestClient, db: Session) -> None:
+    make_cell_user(db)
+    db.commit()
+    login(client, "admin@nitc.ac.in")
+    invite = client.post("/api/cell/users", headers=CSRF,
+                         json={"email": "tpo.officer@gmail.com", "name": "TPO Officer", "role": "coordinator"})
+    assert invite.status_code == 400 and invite.json()["detail"] == "Use an @nitc.ac.in address."
+    student = client.post("/api/cell/students", headers=CSRF, json={
+        "roll_no": "B230199CS", "name": "Outside Mail", "email": "outside@gmail.com", "branch": "CSE",
+        "programme": "BTECH", "cgpa": 8.0, "grad_year": 2026})
+    assert student.status_code == 400 and student.json()["detail"] == "Use an @nitc.ac.in address."
+    ok = client.post("/api/cell/users", headers=CSRF,
+                     json={"email": "Coord.New@NITC.ac.in", "name": "New Coordinator", "role": "coordinator"})
+    assert ok.status_code == 201, ok.text
+
+
+def test_import_flags_rows_outside_the_institute(db: Session) -> None:
+    sheet = ("Roll Number,Student Name,Institute Email,Department,Degree,CPI,Active Backlogs,Batch\n"
+             "B220010CS,Inside Mail,inside@nitc.ac.in,CSE,BTECH,8.1,0,2026\n"
+             "B220011CS,Outside Mail,outside@gmail.com,CSE,BTECH,8.1,0,2026\n")
+    report = import_students(db, sheet)
+    assert report.created == 1
+    assert [e.problems for e in report.errors] == [["not an @nitc.ac.in address 'outside@gmail.com'"]]
+
+
 # ---------------------------------------------------------------- Google sign-in
 class FakeGoogle:
     """Google's token endpoint and signing keys: answers the code exchange with an ID token signed by KEY."""
@@ -68,6 +95,11 @@ class FakeGoogle:
         claims = dict(self.claims)
         if claims.pop("_down", False):
             raise httpx.ConnectError("Google is unreachable")
+        if claims.pop("_refused", False):
+            request = httpx.Request("POST", google_oidc.TOKEN_URL)
+            reply = httpx.Response(401, request=request, json={"error": "invalid_client",
+                                                               "error_description": "The OAuth client was not found."})
+            raise httpx.HTTPStatusError("Client error '401 Unauthorized'", request=request, response=reply)
         key = OTHER_KEY if claims.pop("_other_key", False) else KEY
         now = int(time.time())
         payload = {"iss": "https://accounts.google.com", "aud": CLIENT_ID, "sub": "108177", "email_verified": True,
@@ -137,6 +169,13 @@ def test_redirect_uri_follows_the_address_in_the_browser(google: FakeGoogle, cli
     assert q["redirect_uri"] == "http://localhost:5173" + CALLBACK
 
 
+def test_no_google_button_on_an_ip_address(google: FakeGoogle, client: TestClient) -> None:
+    # Phones on the LAN open http://172.21.42.8:5173; Google refuses IP redirect URIs, so the button would dead-end.
+    on_ip = client.get("/api/auth/options", headers={"host": "172.21.42.8:5173"}).json()
+    assert on_ip == {"google": False, "domain": "nitc.ac.in"}
+    assert client.get("/api/auth/options", headers={"host": "localhost:5173"}).json()["google"] is True
+
+
 def test_callback_signs_in_a_registered_nitc_user(google: FakeGoogle, client: TestClient, db: Session) -> None:
     email = _student(db)
     r, q = _sign_in(client, google, "/student/offers", email=email)
@@ -178,6 +217,28 @@ def test_callback_rejects(google: FakeGoogle, client: TestClient, db: Session, c
     r, _ = _sign_in(client, google, **({"email": email} | claims))
     assert r.headers["location"] == f"/login?error={reason}"
     assert client.get("/api/auth/me").status_code == 401
+
+
+def test_failed_sign_in_is_logged_with_googles_reason_and_no_secret(google: FakeGoogle, client: TestClient,
+                                                                     db: Session,
+                                                                     caplog: pytest.LogCaptureFixture) -> None:
+    # A mis-pasted secret on Render must be diagnosable from its Logs (warnings reach stderr without any setup).
+    email = _student(db)
+    with caplog.at_level(logging.INFO):
+        r, _ = _sign_in(client, google, email=email, _refused=True)
+    assert r.headers["location"] == "/login?error=failed"
+    warnings = [rec.getMessage() for rec in caplog.records if rec.levelno == logging.WARNING]
+    assert any("invalid_client" in m and "The OAuth client was not found." in m for m in warnings), warnings
+    assert "test-secret" not in caplog.text
+
+
+def test_error_from_the_query_cannot_forge_log_lines(google: FakeGoogle, client: TestClient,
+                                                     caplog: pytest.LogCaptureFixture) -> None:
+    _start(client)
+    with caplog.at_level(logging.INFO):
+        client.get(CALLBACK, params={"error": "x\n[driveops] OTP for admin@nitc.ac.in: 123456"},
+                   follow_redirects=False)
+    assert caplog.records and all("\n" not in rec.getMessage() for rec in caplog.records)
 
 
 def test_inactive_user_is_not_registered(google: FakeGoogle, client: TestClient, db: Session) -> None:

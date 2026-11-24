@@ -97,7 +97,10 @@ def callback(request: Request, db: DbSession, code: str | None = None, state: st
     try:
         user, next_path = _finish(db, settings, request, code, state, error)
     except GoogleSignInError as exc:
-        log.info("Google sign-in refused (%s): %s", exc.reason, exc.detail)
+        # Unexpected failures are warnings, which reach Render's Logs without any logging setup; %r keeps a
+        # crafted ?error= on one line.
+        level = logging.WARNING if exc.reason == "failed" else logging.INFO
+        log.log(level, "Google sign-in refused (%s): %r", exc.reason, exc.detail[:300])
         response = RedirectResponse(f"/login?error={exc.reason}", status_code=status.HTTP_303_SEE_OTHER)
     else:
         response = RedirectResponse(next_path, status_code=status.HTTP_303_SEE_OTHER)

@@ -25,7 +25,8 @@ class Settings(BaseSettings):
     # Only addresses at this domain can sign in (OTP or Google). Blank allows any domain.
     institute_domain: str = "nitc.ac.in"
     # "Continue with Google" (OpenID Connect). On when both are set; the client comes from Google Cloud >
-    # Google Auth Platform > Clients (Web application), with PUBLIC_URL + /api/auth/google/callback as a redirect URI.
+    # Google Auth Platform > Clients (Web application). Its redirect URIs are <each address the site is opened on>
+    # + /api/auth/google/callback, e.g. http://localhost:5173/... and https://<service>.onrender.com/...
     google_client_id: str = ""
     google_client_secret: str = ""
 

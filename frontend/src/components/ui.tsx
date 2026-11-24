@@ -23,7 +23,7 @@ export function Button({
 }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant; size?: "small" | "big"; busy?: boolean }) {
   const cls = ["btn", variant !== "default" ? variant : "", size ?? "", className].filter(Boolean).join(" ");
   return (
-    <button className={cls} disabled={busy || rest.disabled} aria-busy={busy || undefined} {...rest}>
+    <button {...rest} className={cls} disabled={busy || rest.disabled} aria-busy={busy || undefined}>
       {busy ? "Working…" : children}
     </button>
   );
