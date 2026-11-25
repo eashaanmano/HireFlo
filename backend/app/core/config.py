@@ -32,6 +32,8 @@ class Settings(BaseSettings):
 
     # Drive-day operations
     delay_threshold_min: int = 10        # projected lateness that triggers a re-plan proposal
+    call_ahead_min: int = 15             # "you're up next" alert: the interview starts within this many minutes,
+    call_ahead_count: int = 2            # ...or at most this many interviews are ahead of it on its panel
     no_show_grace_min: int = 10          # minutes after slot start before a no-show is flagged
     monitor_interval_sec: int = 30       # background check of live drives
     nudge_hours_before: int = 24         # remind eligible non-applicants this long before a deadline (0 = off)

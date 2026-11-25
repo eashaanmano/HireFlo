@@ -38,6 +38,7 @@ ACTIVE_SLOT = (SlotStatus.scheduled, SlotStatus.in_progress)
 BUFFER_BETWEEN_ROUNDS_MIN = 5
 ARRIVAL_WINDOW_MIN = 15  # a not-yet-checked-in student is never pulled earlier than this before their slot
 DOWN_HORIZON = timedelta(hours=12)  # how far a panel that is down "indefinitely" pushes its queue in projections
+CALL_WINDOW_MAX_MIN = 60  # never call someone whose interview is over an hour away, however short the queue
 
 
 class LiveError(Exception):
@@ -362,6 +363,9 @@ def apply_proposal(db: Session, proposal: ReplanProposal, actor: str) -> int:
         notifications.notify(db, touched_students, "Your interview time changed",
                              "The drive was re-planned to keep things on time. Open your timeline for the new "
                              "time and panel.", link="/student/schedule")
+    drive = db.get(Drive, proposal.drive_id)
+    if drive is not None:
+        call_next(db, drive)
     return applied
 
 
@@ -426,6 +430,7 @@ def complete_slot(db: Session, slot: Slot, result: str, actor: str) -> Slot:
     if result == "pass" and app.status == AppStatus.in_process:
         place_in_next_round(db, app, actor)
     maybe_propose_for_delay(db, app.drive, actor)
+    call_next(db, app.drive)
     return slot
 
 
@@ -498,6 +503,47 @@ def maybe_propose_for_delay(db: Session, drive: Drive, actor: str, now: datetime
     propose_replan(db, drive, f"Running {worst} min behind schedule", actor, now)
 
 
+def call_next(db: Session, drive: Drive, now: datetime | None = None) -> int:
+    """Tell students to head to their room shortly before their interview, once per interview.
+
+    A waiting interview is called when it is projected to start within `call_ahead_min` minutes, or when at most
+    `call_ahead_count` interviews are ahead of it on its panel and it starts within the hour. The projection and the
+    "ahead" count are the ones the student's drive-day banner shows, so the alert never disagrees with the screen.
+    Returns how many students were alerted.
+    """
+    now = now or utcnow()
+    settings = get_settings()
+    called = set(db.scalars(select(Event.entity_id).where(Event.type == "slot.called", Event.drive_id == drive.id)))
+    count = 0
+    for proj in drive_projection(db, drive, now).values():
+        for sp in proj:
+            slot = sp.slot
+            if slot.status != SlotStatus.scheduled or slot.id in called:
+                continue
+            minutes = max(0, math.ceil(minutes_between(now, sp.projected_start) - 1e-6))
+            ahead = sum(1 for p in proj if p.position < sp.position)
+            soon = minutes <= settings.call_ahead_min
+            close = ahead <= settings.call_ahead_count and minutes <= CALL_WINDOW_MAX_MIN
+            if soon or close:
+                _send_call(db, drive, slot, ahead, minutes, sp.projected_start)
+                count += 1
+    return count
+
+
+def _send_call(db: Session, drive: Drive, slot: Slot, ahead: int, minutes: int, eta: datetime) -> None:
+    panel, student = slot.panel, slot.application.student
+    title = f"{drive.company.name}: you're up {'next' if ahead == 0 else 'soon'}"
+    lead = "You're next" if ahead == 0 else f"{ahead} ahead of you"
+    when = "starting now" if minutes <= 1 else f"about {minutes} min"
+    body = f"{_slot_round(slot).name} with {panel.name}: {lead}, {when}. Go to {panel.room}."
+    if slot.checked_in_at is None:
+        body += " Check in at the venue first."
+    emit(db, "slot.called", "system", entity="slot", entity_id=slot.id, drive_id=drive.id,
+         student_id=student.id, payload={"ahead": ahead, "eta": eta.isoformat()})
+    notifications.notify(db, [student.id], title, body, link="/student")
+    notifications.send_email(student.email, title, f"{body}\n\nOpen HireFlo: {get_settings().public_url}/student")
+
+
 def monitor_tick(db: Session, now: datetime | None = None) -> None:
     """Background check for live drives: overruns and students who haven't arrived."""
     now = now or utcnow()
@@ -515,6 +561,7 @@ def monitor_tick(db: Session, now: datetime | None = None) -> None:
                 propose_replan(db, drive, f"{slot.application.student.name} hasn't checked in", "monitor", now)
                 break
         maybe_propose_for_delay(db, drive, "monitor", now)
+        call_next(db, drive, now)
 
 
 # ---------------------------------------------------------------- disruptions (live "what if it goes wrong")
