@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     cors_origins: str = "http://localhost:5173"  # comma separated
     session_hours: int = 12
     recruiter_link_days: int = 21
+    jnf_link_days: int = 30             # company job notification form links
     otp_ttl_minutes: int = 10
     otp_max_attempts: int = 5
     # Only addresses at this domain can sign in (OTP or Google). Blank allows any domain.

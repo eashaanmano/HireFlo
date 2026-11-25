@@ -376,6 +376,29 @@ class Experience(Base):
     created_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utcnow)
 
 
+class JobNotification(Base, Timestamped):
+    """A company's Job Notification Form (JNF), filled through a signed link and approved by the cell into a drive.
+
+    Status: invited -> submitted -> (changes_requested -> submitted)* -> approved | declined.
+    """
+
+    __tablename__ = "job_notifications"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    company_name: Mapped[str] = mapped_column(String(120))
+    contact_name: Mapped[str | None] = mapped_column(String(120))
+    contact_email: Mapped[str | None] = mapped_column(String(255))
+    company_id: Mapped[int | None] = mapped_column(ForeignKey("companies.id"), nullable=True)
+    status: Mapped[str] = mapped_column(String(20), default="invited", index=True)
+    link_version: Mapped[int] = mapped_column(Integer, default=1)
+    data: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
+    cell_note: Mapped[str | None] = mapped_column(Text)
+    drive_id: Mapped[int | None] = mapped_column(ForeignKey("drives.id", ondelete="SET NULL"), nullable=True)
+    invited_by: Mapped[str] = mapped_column(String(255))
+    decided_by: Mapped[str | None] = mapped_column(String(255))
+    submitted_at: Mapped[datetime | None] = mapped_column(UTCDateTime)
+    decided_at: Mapped[datetime | None] = mapped_column(UTCDateTime)
+
+
 class Event(Base):
     """Append-only log: live updates, audit trail and analytics all read from here."""
 

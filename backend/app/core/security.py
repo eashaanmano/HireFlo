@@ -20,7 +20,7 @@ CSRF_HEADER = "X-DriveOps-CSRF"
 GOOGLE_FLOW_COOKIE = "driveops_google"
 GOOGLE_FLOW_TTL = timedelta(minutes=10)
 
-TokenKind = Literal["session", "recruiter", "panel", "checkin", "google_flow"]
+TokenKind = Literal["session", "recruiter", "panel", "checkin", "google_flow", "jnf"]
 
 
 class TokenError(Exception):
@@ -89,6 +89,20 @@ def decode_link_token(token: str, kind: Literal["recruiter", "panel"]) -> LinkCl
     data = _decode(token, kind)
     return LinkClaims(kind=kind, drive_id=int(data["drive"]), version=int(data["v"]),
                       panel_id=int(data["panel"]) if "panel" in data else None)
+
+
+# ---------------------------------------------------------------- company job notification form links
+def create_jnf_token(jnf_id: int, version: int) -> str:
+    return _encode({"kind": "jnf", "jnf": jnf_id, "v": version}, timedelta(days=get_settings().jnf_link_days))
+
+
+def decode_jnf_token(token: str) -> tuple[int, int]:
+    """Returns (form id, link version)."""
+    data = _decode(token, "jnf")
+    try:
+        return int(data["jnf"]), int(data["v"])
+    except (KeyError, TypeError, ValueError) as exc:
+        raise TokenError("incomplete form link") from exc
 
 
 # ---------------------------------------------------------------- venue check-in (rotating QR)

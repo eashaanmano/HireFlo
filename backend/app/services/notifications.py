@@ -11,10 +11,11 @@ from collections.abc import Iterable
 from email.message import EmailMessage
 
 import httpx
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from ..core.config import get_settings
-from ..models import Notification
+from ..models import Drive, EligibilityDecision, Notification
 from .events import emit
 
 log = logging.getLogger("driveops.notify")
@@ -27,6 +28,15 @@ def notify(db: Session, student_ids: Iterable[int], title: str, body: str, link:
         emit(db, "notification.created", "system", entity="student", entity_id=sid, student_id=sid)
         count += 1
     return count
+
+
+def announce_drive(db: Session, drive: Drive) -> int:
+    """Tell every eligible student that a drive has opened."""
+    eligible = [sid for sid, in db.execute(select(EligibilityDecision.student_id).where(
+        EligibilityDecision.drive_id == drive.id, EligibilityDecision.eligible.is_(True)))]
+    return notify(db, eligible, f"New drive: {drive.company.name}",
+                  f"You're eligible for {drive.role} ({drive.ctc_lpa:g} LPA). Apply before the deadline.",
+                  link=f"/student/drives/{drive.id}")
 
 
 def _send_email_sync(to: str, subject: str, body: str) -> None:

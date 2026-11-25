@@ -8,9 +8,15 @@ from typing import Annotated
 from fastapi import Depends, Header, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
-from ..models import Drive, Panel, Role, Student, User
+from ..models import Drive, JobNotification, Panel, Role, Student, User
 from .database import get_db
-from .security import SESSION_COOKIE, TokenError, decode_link_token, decode_session_token
+from .security import (
+    SESSION_COOKIE,
+    TokenError,
+    decode_jnf_token,
+    decode_link_token,
+    decode_session_token,
+)
 
 DbSession = Annotated[Session, Depends(get_db)]
 
@@ -125,5 +131,25 @@ def panel_context(request: Request, db: DbSession,
     return PanelContext(drive=drive, panel=panel, actor=f"panel:{panel.name}")
 
 
+@dataclass
+class JnfContext:
+    jnf: JobNotification
+    actor: str
+
+
+def jnf_context(request: Request, db: DbSession,
+                x_access_token: Annotated[str | None, Header()] = None) -> JnfContext:
+    """A company's job notification form link: no account, one form, revocable by the cell."""
+    try:
+        jnf_id, version = decode_jnf_token(_link_token(x_access_token, request))
+    except TokenError as exc:
+        raise _unauthorised("This form link is invalid or has expired. Ask the placement cell for a new one.") from exc
+    jnf = db.get(JobNotification, jnf_id)
+    if jnf is None or jnf.link_version != version:
+        raise _unauthorised("This form link was replaced. Ask the placement cell for the new one.")
+    return JnfContext(jnf=jnf, actor=f"company:{jnf.company_name}")
+
+
 RecruiterCtx = Annotated[RecruiterContext, Depends(recruiter_context)]
+JnfCtx = Annotated[JnfContext, Depends(jnf_context)]
 PanelCtx = Annotated[PanelContext, Depends(panel_context)]

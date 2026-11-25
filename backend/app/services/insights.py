@@ -19,6 +19,7 @@ from ..models import (
     Drive,
     DriveStatus,
     EligibilityDecision,
+    JobNotification,
     Notification,
     Offer,
     OfferStatus,
@@ -254,6 +255,17 @@ def exceptions_inbox(db: Session, now: datetime | None = None) -> list[dict[str,
                           "detail": f"{len(unsure)} rule(s) waiting"
                                     + (f", {len(low)} with low confidence" if low else "") + ".",
                           "at": ensure_utc(drive.updated_at).isoformat()})  # type: ignore[union-attr]
+    submitted = db.scalars(select(JobNotification).where(JobNotification.status == "submitted")).all()
+    if submitted:
+        _, cfg = active_policy(db)
+        for n in submitted:
+            data = n.data or {}
+            ctc = float(data.get("ctc_lpa") or 0)
+            items.append({"kind": "jnf", "id": n.id, "drive_id": 0, "severity": "medium",
+                          "title": f"New job notification from {n.company_name}",
+                          "detail": f"{data.get('role', 'Role not given')}, {ctc:g} LPA ({cfg.tier_name(ctc)}). "
+                                    "Review it and approve it into a drive.",
+                          "at": ensure_utc(n.submitted_at or n.updated_at).isoformat()})  # type: ignore[union-attr]
     grace = timedelta(minutes=get_settings().no_show_grace_min)
     late = db.scalars(select(Slot).where(Slot.status == SlotStatus.scheduled, Slot.checked_in_at.is_(None),
                                          Slot.start_at < now - grace, Slot.start_at > now - timedelta(hours=8)))

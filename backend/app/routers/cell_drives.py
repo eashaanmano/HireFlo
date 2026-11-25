@@ -121,11 +121,7 @@ def update_drive(drive_id: int, body: DriveUpdate, user: CellUser, db: DbSession
             raise bad_request("Approve or remove the pending eligibility rules before opening the drive.")
         d.status = new_status
         if new_status == DriveStatus.open:
-            eligible_ids = [s for s, in db.execute(select(EligibilityDecision.student_id).where(
-                EligibilityDecision.drive_id == d.id, EligibilityDecision.eligible.is_(True)))]
-            notifications.notify(db, eligible_ids, f"New drive: {d.company.name}",
-                                 f"You're eligible for {d.role} ({d.ctc_lpa:g} LPA). Apply before the deadline.",
-                                 link=f"/student/drives/{d.id}")
+            notifications.announce_drive(db, d)
     if "ctc_lpa" in data or new_status:
         eligibility.recompute_drive(db, d)
     emit(db, "drive.updated", user.email, entity="drive", entity_id=d.id, drive_id=d.id,

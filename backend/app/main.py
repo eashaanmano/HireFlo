@@ -17,7 +17,19 @@ from fastapi.staticfiles import StaticFiles
 from .core.config import get_settings
 from .core.database import SessionLocal, create_all
 from .core.security import CSRF_HEADER, SESSION_COOKIE
-from .routers import assistant, auth, cell, cell_drives, google_auth, panel, recruiter, student, ws
+from .routers import (
+    assistant,
+    auth,
+    cell,
+    cell_drives,
+    cell_jnf,
+    google_auth,
+    jnf,
+    panel,
+    recruiter,
+    student,
+    ws,
+)
 from .services import live, nudges, tracing
 from .services.events import manager
 
@@ -94,8 +106,8 @@ def create_app() -> FastAPI:
             response.headers.setdefault("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
         return response
 
-    for r in (auth.router, google_auth.router, student.router, cell.router, cell_drives.router, recruiter.router,
-              panel.router, assistant.router, ws.router):
+    for r in (auth.router, google_auth.router, student.router, cell.router, cell_drives.router, cell_jnf.router,
+              recruiter.router, panel.router, jnf.router, assistant.router, ws.router):
         app.include_router(r)
 
     @app.get("/api/health", tags=["ops"])

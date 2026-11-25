@@ -1,7 +1,7 @@
 """Request and response schemas. All input is validated here before it reaches a service."""
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import date, datetime
 from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
@@ -414,3 +414,61 @@ class UserOut(ORM):
     name: str
     role: Role
     active: bool
+
+
+# ---------------------------------------------------------------- company job notification form (JNF)
+def _codes(values: list[str]) -> list[str]:
+    return list(dict.fromkeys(v.strip().upper() for v in values if v and v.strip()))
+
+
+class JnfInviteIn(BaseModel):
+    company_name: str = Field(min_length=2, max_length=120)
+    contact_name: str | None = Field(default=None, max_length=120)
+    contact_email: EmailStr | None = None
+
+
+class JnfCriteria(BaseModel):
+    """Who can apply; also what the form's live eligible-student count is computed from."""
+
+    ctc_lpa: float = Field(gt=0, le=500)
+    branches: list[str] = Field(default_factory=list, max_length=30)
+    programmes: list[str] = Field(default_factory=list, max_length=12)
+    cgpa_min: float | None = Field(default=None, ge=0, le=10)
+    max_backlogs: int | None = Field(default=None, ge=0, le=20)
+
+    @field_validator("branches", "programmes")
+    @classmethod
+    def _upper(cls, v: list[str]) -> list[str]:
+        return _codes(v)
+
+
+class JnfRound(BaseModel):
+    name: str = Field(min_length=2, max_length=80)
+    kind: Literal["test", "interview"]
+    duration_min: int = Field(ge=10, le=240)
+
+
+class JnfForm(JnfCriteria):
+    role: str = Field(min_length=2, max_length=160)
+    base_lpa: float | None = Field(default=None, ge=0, le=500)
+    variable_lpa: float | None = Field(default=None, ge=0, le=500)
+    joining_bonus_lpa: float | None = Field(default=None, ge=0, le=500)
+    other_lpa: float | None = Field(default=None, ge=0, le=500)
+    location: str | None = Field(default=None, max_length=120)
+    bond_months: int = Field(default=0, ge=0, le=60)
+    bond_note: str | None = Field(default=None, max_length=300)
+    rounds: list[JnfRound] = Field(min_length=1, max_length=6)
+    interview_panels: int | None = Field(default=None, ge=1, le=20)
+    preferred_date: date | None = None
+    apply_by: date | None = None
+    target_hires: int = Field(default=1, ge=1, le=500)
+    jd_text: str = Field(default="", max_length=20000)
+    notes: str | None = Field(default=None, max_length=2000)
+
+
+class JnfNoteIn(BaseModel):
+    note: str = Field(min_length=3, max_length=2000)
+
+
+class JnfApproveIn(BaseModel):
+    open_now: bool = True
