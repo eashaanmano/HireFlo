@@ -34,7 +34,7 @@ HireFlo answers those questions live, for everyone, from one event stream.
 | --- | --- | --- |
 | **Student** | NITC Google account (OAuth) or e-mail OTP (profile pre-imported, no signup) | "What needs you" dashboard, explained eligibility, live interview queue and ETA, offer what-ifs ("which drives would I lose?"), AI assistant |
 | **Placement cell** | NITC Google account or e-mail OTP (coordinator or admin) | Exceptions inbox, JD to rules with human approval, versioned policy engine, conflict-free scheduling, drive control room with one-click re-plans, analytics, audit log, simulator |
-| **Recruiter** | Expiring magic link (no account) | Pool what-if before committing, shortlists and results as CSV, resume bundle, live panel progress, hiring funnel |
+| **Recruiter** | Expiring magic link (no account) | Job notification form with a live eligible-student count, pool what-if before committing, shortlists and results as CSV, resume bundle, live panel progress, hiring funnel |
 | **Interview panel** | Per-panel link | One screen: next candidate, resume, Start, Done |
 
 When a panelist taps **Done**, the student's queue position, the cell's control room and the recruiter's progress
@@ -52,12 +52,18 @@ estimate all update at once over WebSockets.
   so no one student absorbs everyone's slack, and starts the search from the current plan for stability.
 - **Drive simulator:** replays a drive day with random overruns and no-shows, fixed plan against live re-planning,
   using the same random draws for both.
+- **"You're up next" alerts:** each student gets one in-app and e-mail heads-up shortly before their interview
+  (within 15 minutes, or 2 interviews ahead on their panel), from the same projection their queue banner shows.
 
 **Explainable eligibility and policy**
 - A deterministic policy engine with versioned rules: tiers (Regular, Dream, Super Dream), PSU rules and upgrade
   chances after an offer. Every "not eligible" names the rule code (P1–P6) and the exact reason.
 - JD text becomes eligibility rules, each with the source sentence and a confidence score. Rules go live only after
   the cell approves them.
+- **Job notification form (JNF):** the cell sends a company a signed link; HR fills in the role, CTC breakup, bond,
+  criteria, rounds and dates while a live count shows how many students qualify. The cell reviews it with flags (bond,
+  variable pay, a breakup that doesn't add up, a same-day drive, too few eligible students) and approves it into a
+  drive in one click.
 
 **Grounded AI assistant (optional)**
 - One provider layer for **Azure OpenAI** and **Groq**, with task routing and automatic fall-back. Azure handles
@@ -190,9 +196,11 @@ credit, is in **[docs/NEON_AZURE_GROQ.md](docs/NEON_AZURE_GROQ.md)**.
 5. **Midhun → Offers.** Before accepting, he sees exactly which drives he'd lose.
 6. **Recruiter link.** Drag the CGPA slider to see the eligible pool change, then send the change to the cell as
    rules to approve.
-7. **Cell → Drives → Schedule.** Set 09:00–11:00 with one panel and "up to 2 days". The solver spreads the round over
+7. **Cell → Companies → Send job notification form.** Open the link as the company, watch the eligible count while
+   setting criteria, send it, then approve it from the Inbox: the drive opens and eligible students are notified.
+8. **Cell → Drives → Schedule.** Set 09:00–11:00 with one panel and "up to 2 days". The solver spreads the round over
    two days.
-8. **Cell → Simulator.** Compare a fixed plan with live re-planning under heavy overruns and no-shows.
+9. **Cell → Simulator.** Compare a fixed plan with live re-planning under heavy overruns and no-shows.
 
 ## Tests
 

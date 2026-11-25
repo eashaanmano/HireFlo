@@ -4,7 +4,7 @@
 
 ```mermaid
 flowchart TB
-  R[Recruiter<br/>magic link] <--> API
+  R[Recruiter<br/>magic link · JNF link] <--> API
   C[Placement cell<br/>OTP or Google session] <--> API
   S[Student PWA<br/>OTP or Google session] <--> API
   G[Google<br/>OpenID Connect] -. sign-in .-> API
@@ -47,6 +47,28 @@ scheduled ──start──▶ in_progress ──complete(pass|fail)──▶ do
     │                                                   └─ pass + next interview round scheduled → new slot in that queue
     └─no-show──▶ no_show ──late check-in──▶ scheduled (and a re-plan is drafted)
 ```
+
+## Links without accounts
+
+Signed tokens (HS256, `SECRET_KEY`) with a kind each, so one can never stand in for another:
+
+| Kind | Scope | Lifetime | Revoked by |
+| --- | --- | --- | --- |
+| `recruiter` | one drive | 21 days | rotating the drive's link version |
+| `panel` | one panel of one drive | 21 days | rotating the drive's link version |
+| `jnf` | one company's job notification form | 30 days | "New link" on the form (bumps its version) |
+| `checkin` | one drive's venue QR | 90 seconds | expiry |
+
+A job notification form is stored in `job_notifications` (status `invited → submitted → changes_requested →
+submitted … → approved | declined`). The company sees its own form and aggregate counts only; approval creates the
+drive, its rounds and the form's criteria as approved rules, and opens it when no JD-extracted rule is left to approve.
+
+## "You're up next" alerts
+
+`live.call_next()` runs from the monitor, after a panel marks an interview done and after a re-plan is approved. A
+waiting slot is called once (a `slot.called` event dedupes it) when it is projected to start within
+`CALL_AHEAD_MIN` (15) minutes, or when at most `CALL_AHEAD_COUNT` (2) interviews are ahead and it starts within the
+hour. The projection is the one the student's drive-day banner shows.
 
 ## Re-planning
 

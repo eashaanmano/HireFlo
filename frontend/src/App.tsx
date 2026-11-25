@@ -13,11 +13,13 @@ import { CellDrive } from "./pages/cell/Drive";
 import { CellDrives } from "./pages/cell/Drives";
 import { CellInbox } from "./pages/cell/Inbox";
 import { CellInsights } from "./pages/cell/Insights";
+import { CellJnfReview } from "./pages/cell/JnfReview";
 import { CellPolicy } from "./pages/cell/Policy";
 import { CellSimulator } from "./pages/cell/Simulator";
 import { CellStudents } from "./pages/cell/Students";
 import { CellUsers } from "./pages/cell/Users";
 import { PanelView } from "./pages/panel/PanelView";
+import { JobNotificationForm } from "./pages/recruiter/JobNotificationForm";
 import { RecruiterDrive } from "./pages/recruiter/RecruiterDrive";
 import { StudentAsk } from "./pages/student/Ask";
 import { StudentDrive } from "./pages/student/Drive";
@@ -52,6 +54,7 @@ export function App() {
           <Route path="/checkin" element={<CheckIn />} />
           <Route path="/r/:token" element={<RecruiterDrive />} />
           <Route path="/p/:token" element={<PanelView />} />
+          <Route path="/j/:token" element={<JobNotificationForm />} />
           <Route path="/student" element={<Guard role="student"><StudentShell /></Guard>}>
             <Route index element={<StudentHome />} />
             <Route path="drives" element={<StudentDrives />} />
@@ -68,6 +71,7 @@ export function App() {
             <Route path="drives/:id/control" element={<ControlRoomPage />} />
             <Route path="students" element={<CellStudents />} />
             <Route path="companies" element={<CellCompanies />} />
+            <Route path="jnf/:id" element={<CellJnfReview />} />
             <Route path="insights" element={<CellInsights />} />
             <Route path="policy" element={<CellPolicy />} />
             <Route path="simulator" element={<CellSimulator />} />

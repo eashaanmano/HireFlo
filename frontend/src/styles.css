@@ -648,3 +648,15 @@ tr.lost td:first-child { text-decoration: line-through; }
 .dt tbody tr.archived td { opacity: .6; }
 .grid > .card + .card { margin-top: 0; }
 .dt-foot select { height: 30px; font-size: 13px; padding: 0 6px; }
+
+/* ---------------------------------------------------------------- job notification form (JNF) */
+fieldset.bare, fieldset.checks { border: 0; padding: 0; margin: 0; min-width: 0; }
+fieldset.checks legend { font-size: 13px; font-weight: 600; color: var(--ink-2); padding: 0; margin-bottom: 6px; }
+.chip.check { cursor: pointer; font-size: 13px; padding: 3px 10px; }
+.chip.check input { margin: 0; }
+.chip.check:has(input:checked) { background: var(--signal-soft); color: var(--signal); border-color: var(--signal); }
+.chip.check:has(input:focus-visible) { outline: 2px solid var(--signal); outline-offset: 2px; }
+.jnf-round { display: grid; grid-template-columns: 20px minmax(0, 2fr) minmax(0, 1fr) 96px auto; gap: 10px; align-items: end; }
+@media (max-width: 640px) { .jnf-round { grid-template-columns: 1fr 1fr; } .jnf-round > span { display: none; } }
+ul.plain { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+ul.flags { margin: 0; padding-left: 18px; color: var(--amber); display: grid; gap: 4px; font-weight: 600; }

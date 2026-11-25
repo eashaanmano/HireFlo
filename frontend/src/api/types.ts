@@ -229,7 +229,7 @@ export interface QaAnswer {
 }
 
 export interface InboxItem {
-  kind: "dispute" | "replan" | "rules" | "absent" | "followup";
+  kind: "dispute" | "replan" | "rules" | "absent" | "followup" | "jnf";
   id: number;
   drive_id: number;
   severity: "high" | "medium" | "low";
@@ -614,4 +614,84 @@ export interface LlmTest {
   ms: number;
   reply?: string;
   error?: string;
+}
+
+// ---------------------------------------------------------------- company job notification form (JNF)
+export type JnfStatus = "invited" | "submitted" | "changes_requested" | "approved" | "declined";
+
+export interface JnfRound {
+  name: string;
+  kind: "test" | "interview";
+  duration_min: number;
+}
+
+export interface JnfData {
+  role: string;
+  ctc_lpa: number;
+  base_lpa: number | null;
+  variable_lpa: number | null;
+  joining_bonus_lpa: number | null;
+  other_lpa: number | null;
+  location: string | null;
+  bond_months: number;
+  bond_note: string | null;
+  branches: string[];
+  programmes: string[];
+  cgpa_min: number | null;
+  max_backlogs: number | null;
+  rounds: JnfRound[];
+  interview_panels: number | null;
+  preferred_date: string | null;
+  apply_by: string | null;
+  target_hires: number;
+  jd_text: string;
+  notes: string | null;
+}
+
+export interface JnfCriteria {
+  ctc_lpa: number;
+  branches: string[];
+  programmes: string[];
+  cgpa_min: number | null;
+  max_backlogs: number | null;
+}
+
+export interface JnfPool {
+  eligible: number;
+  total_students: number;
+  tier: string;
+}
+
+export interface JnfPublic {
+  id: number;
+  status: JnfStatus;
+  company_name: string;
+  contact_name: string | null;
+  data: JnfData | null;
+  cell_note: string | null;
+  editable: boolean;
+  options: { branches: string[]; programmes: string[] };
+}
+
+export interface JnfRow {
+  id: number;
+  company_name: string;
+  contact_name: string | null;
+  contact_email: string | null;
+  status: JnfStatus;
+  role: string | null;
+  ctc_lpa: number | null;
+  drive_id: number | null;
+  cell_note: string | null;
+  invited_by: string;
+  decided_by: string | null;
+  created_at: string | null;
+  submitted_at: string | null;
+  decided_at: string | null;
+}
+
+export interface JnfDetail {
+  jnf: JnfRow & { data: JnfData | null };
+  review: (JnfPool & { flags: string[] }) | null;
+  url: string;
 }

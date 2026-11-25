@@ -13,6 +13,7 @@ const KIND_LABEL: Record<InboxItem["kind"], string> = {
   dispute: "Dispute",
   rules: "Rules",
   followup: "Follow-up",
+  jnf: "Company form",
 };
 
 function DisputeModal({ id, onClose }: { id: number; onClose: () => void }) {
@@ -80,6 +81,8 @@ export function CellInbox() {
         return <Button size="small" onClick={() => setDispute(i.id)}>Review</Button>;
       case "rules":
         return <Link className="btn small" to={`/cell/drives/${i.drive_id}`}>Review rules</Link>;
+      case "jnf":
+        return <Link className="btn small" to={`/cell/jnf/${i.id}`}>Review</Link>;
       default:
         return <Link className="btn small" to={`/cell/drives/${i.drive_id}`}>Open drive</Link>;
     }
@@ -97,7 +100,7 @@ export function CellInbox() {
       )}
       <Card>
         {items.length === 0 ? (
-          <Empty title="Inbox zero">Disputes, uncertain rules, late arrivals and re-plans will show up here.</Empty>
+          <Empty title="Inbox zero">Disputes, uncertain rules, late arrivals, re-plans and company forms will show up here.</Empty>
         ) : (
           items.map((i) => (
             <div className="inbox-item" key={`${i.kind}-${i.id}`}>
