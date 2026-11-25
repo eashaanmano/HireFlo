@@ -88,6 +88,17 @@ def test_students_not_checked_in_are_told_to_check_in(db: Session) -> None:
     assert "Check in" in _notes(db, away.application.student_id)[0].body
 
 
+def test_room_running_over_says_any_minute_now(db: Session) -> None:
+    d = _scheduled_drive(db, n=2, panels=1, start_in_min=-100)
+    first, second = sorted(db.scalars(select(Slot).where(Slot.drive_id == d.id)), key=lambda s: ensure_utc(s.start_at))
+    live.start_slot(db, first, "panel")
+    first.actual_start = utcnow() - timedelta(minutes=45)  # a 30-minute interview still going after 45
+    live.call_next(db, d)
+    db.commit()
+    body = _notes(db, second.application.student_id)[0].body
+    assert "1 ahead of you, any minute now" in body
+
+
 def test_panel_marking_done_calls_the_next_student(client: TestClient, db: Session) -> None:
     d = _scheduled_drive(db, n=4, panels=1, start_in_min=-100)  # behind schedule: everyone is projected from now
     slots = sorted(db.scalars(select(Slot).where(Slot.drive_id == d.id)), key=lambda s: ensure_utc(s.start_at))

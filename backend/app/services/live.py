@@ -534,7 +534,10 @@ def _send_call(db: Session, drive: Drive, slot: Slot, ahead: int, minutes: int, 
     panel, student = slot.panel, slot.application.student
     title = f"{drive.company.name}: you're up {'next' if ahead == 0 else 'soon'}"
     lead = "You're next" if ahead == 0 else f"{ahead} ahead of you"
-    when = "starting now" if minutes <= 1 else f"about {minutes} min"
+    if minutes > 1:
+        when = f"about {minutes} min"
+    else:  # someone still in the room means the interview ahead is running over, not that yours has started
+        when = "any minute now" if ahead else "starting now"
     body = f"{_slot_round(slot).name} with {panel.name}: {lead}, {when}. Go to {panel.room}."
     if slot.checked_in_at is None:
         body += " Check in at the venue first."
